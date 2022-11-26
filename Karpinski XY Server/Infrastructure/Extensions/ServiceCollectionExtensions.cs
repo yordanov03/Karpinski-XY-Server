@@ -71,6 +71,7 @@ namespace Karpinski_XY.Infrastructure.Extensions
 
 
         public static void AddApiControllers(this IServiceCollection services)
-            => services.AddControllers(options => options.Filters.Add<ModelOrNotFoundActionFilter>());
+        { }
+            //=> services.AddControllers(options => options.Filters.Add<ModelOrNotFoundActionFilter>());
     }
 }
