@@ -1,11 +1,10 @@
 ﻿using Karpinski_XY.Data;
-using Karpinski_XY.Features.Identity;
 using Karpinski_XY.Infrastructure.Filters;
-using Karpinski_XY.Infrastructure.Services;
 using Karpinski_XY.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using NetCore.AutoRegisterDi;
 using System.Text;
 
 namespace Karpinski_XY.Infrastructure.Extensions
@@ -64,14 +63,15 @@ namespace Karpinski_XY.Infrastructure.Extensions
             return services;
         }
 
-        public static IServiceCollection AddApplicationServices(this IServiceCollection services)
-             => services
-                .AddTransient<IIdentityService, IdentityService>()
-                .AddScoped<ICurrentUserService, CurrentUserService>();
-
+        public static void AddApplicationServices(this IServiceCollection services)
+             => services.RegisterAssemblyPublicNonGenericClasses()
+                    .Where(c => c.Name.EndsWith("Service"))
+                    .AsPublicImplementedInterfaces(ServiceLifetime.Scoped);
 
         public static void AddApiControllers(this IServiceCollection services)
-        { }
-            //=> services.AddControllers(options => options.Filters.Add<ModelOrNotFoundActionFilter>());
+        => services.AddControllers(options => options.Filters.Add<ModelOrNotFoundActionFilter>());
+
+        public static IServiceCollection AddAutoMapper(this IServiceCollection services)
+            => services.AddAutoMapper(typeof(Program));
     }
 }
