@@ -41,7 +41,7 @@ namespace Karpinski_XY_Server.Features.Paintings
         {
             var paintings = await this._context
                 .Paintings
-                .Where(p => p.IsAvailableToSell)
+                .Where(p => p.IsAvailableToSell && p.IsDeleted == false)
                 .ToListAsync();
 
            var mapped = this._mapper.Map<List<Painting>,IEnumerable<PaintingDto>>(paintings);
@@ -65,16 +65,21 @@ namespace Karpinski_XY_Server.Features.Paintings
             return this._mapper.Map<IEnumerable<PaintingDto>>(paintings);
         }
 
-        public async Task<Result> Update(PaintingDto model)
+        public async Task<Guid> Update(PaintingDto model)
         {
-            this._context.Update(model);
-            return true;
+            var painting = FindPaintingById(model.Id);
+            var updatedPainting = _mapper.Map<Painting>(model);
+     
+            this._context.Update(updatedPainting);
+            await this._context.SaveChangesAsync();
+            return painting.Id;
         }
 
         public async Task<Result> Delete(Guid id)
         {
-            var painting = this.GetPaitingById(id);
-            painting.Result.IsDeleted = true;
+            var painting = this.FindPaintingById(id);
+            painting.IsDeleted = true;
+            this._context.Update(painting);
             await this._context.SaveChangesAsync();
             return true;
         }

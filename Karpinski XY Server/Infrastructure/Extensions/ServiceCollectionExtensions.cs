@@ -22,7 +22,7 @@ namespace Karpinski_XY.Infrastructure.Extensions
         public static IServiceCollection AddDatabase(
             this IServiceCollection services, IConfiguration configuration)
             => services.AddDbContext<ApplicationDbContext>(options => options
-            .UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+            .UseSqlServer(configuration.GetConnectionString("DefaultConnection")).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
         public static IServiceCollection AddIdentity(this IServiceCollection services)
         {

@@ -10,7 +10,7 @@ namespace Karpinski_XY_Server.Features.Paintings
         public Task<IEnumerable<PaintingDto>> GetPortfolioPaitings();
         public Task<PaintingDto> GetPaitingById(Guid id);
         public Task<Guid> Create(PaintingDto model);
-        public Task<Result> Update(PaintingDto model);
+        public Task<Guid> Update(PaintingDto model);
         public Task<Result> Delete(Guid id);
     }
 }

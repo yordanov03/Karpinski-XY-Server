@@ -26,5 +26,13 @@ namespace Karpinski_XY_Server.Models
         public bool IsAvailableToSell { get; set; }
 
         public string ImageUrl { get; set; }
+
+        public string ShortDescription { get; set; }
+
+        public string Technique { get; set; }
+
+        public int Year { get; set; }
+
+
     }
 }

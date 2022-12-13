@@ -40,6 +40,23 @@ namespace Karpinski_XY_Server.Features.Paintings
             return painting;
         }
 
+        [HttpPut]
+        [Route("update")]
+        public async Task<ActionResult>Update(PaintingDto model)
+        {
+            var updated = await this._paintingsService.Update(model);
+
+            return Ok();
+        }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<ActionResult<bool>> Delete(Guid id)
+        {
+            var paintning = this._paintingsService.Delete(id);
+            return Ok(paintning.Result);
+        }
+
         
     }
 }
