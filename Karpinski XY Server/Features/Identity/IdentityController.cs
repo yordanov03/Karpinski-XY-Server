@@ -59,18 +59,18 @@ namespace Karpinski_XY.Features.Identity
 
             if (user == null)
             {
-                return Unauthorized();
+                return Unauthorized("No such user or wrong password");
             }
 
             var passwordValid = await userManager.CheckPasswordAsync(user, model.Password);
 
             if (!passwordValid)
             {
-                return Unauthorized();
+                return Unauthorized("Invalid password");
             }
 
             var token = this.identityService.GenerateJWTToken(user, this.appSettings.Secret);
-            return new { Token = token, Username = user.UserName, Id = user.Id };
+            return Ok(new { Token = token, Username = user.UserName, Id = user.Id });
         }
     }
 }
