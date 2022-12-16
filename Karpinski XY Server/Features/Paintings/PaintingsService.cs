@@ -19,12 +19,12 @@ namespace Karpinski_XY_Server.Features.Paintings
             this._mapper = mapper;
         }
 
-        public async Task<Guid> Create(PaintingDto model)
+        public async Task<Result> Create(PaintingDto model)
         {
             var painting = this._mapper.Map<Painting>(model);
             this._context.Add(painting);
             await this._context.SaveChangesAsync();
-            return painting.Id;
+            return true;
         }
 
         public async Task<IEnumerable<PaintingDto>> GetAllPaitings()
@@ -65,14 +65,14 @@ namespace Karpinski_XY_Server.Features.Paintings
             return this._mapper.Map<IEnumerable<PaintingDto>>(paintings);
         }
 
-        public async Task<Guid> Update(PaintingDto model)
+        public async Task<Result> Update(PaintingDto model)
         {
             var painting = FindPaintingById(model.Id);
             var updatedPainting = _mapper.Map<Painting>(model);
      
             this._context.Update(updatedPainting);
             await this._context.SaveChangesAsync();
-            return painting.Id;
+            return true;
         }
 
         public async Task<Result> Delete(Guid id)

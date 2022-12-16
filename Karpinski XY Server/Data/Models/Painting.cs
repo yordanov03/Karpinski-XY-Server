@@ -1,5 +1,6 @@
 ﻿using Karpinski_XY_Server.Data.Models.Base;
 using System.ComponentModel.DataAnnotations;
+using System.Reflection.Metadata.Ecma335;
 
 namespace Karpinski_XY_Server.Models
 {
@@ -32,6 +33,8 @@ namespace Karpinski_XY_Server.Models
         public string Technique { get; set; }
 
         public int Year { get; set; }
+
+        public bool OnFocus { get; set; }
 
 
     }

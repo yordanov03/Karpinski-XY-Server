@@ -46,15 +46,15 @@ namespace Karpinski_XY_Server.Features.Paintings
         {
             var updated = await this._paintingsService.Update(model);
 
-            return Ok();
+            return Ok(updated);
         }
 
         [HttpDelete]
         [Route("{id}")]
         public async Task<ActionResult<bool>> Delete(Guid id)
         {
-            var paintning = this._paintingsService.Delete(id);
-            return Ok(paintning.Result);
+            var paintning = await this._paintingsService.Delete(id);
+            return Ok(paintning.Succeeded);
         }
 
         

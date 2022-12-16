@@ -23,5 +23,7 @@
         public string Technique { get; set; }
 
         public int Year { get; set; }
+
+        public bool OnFocus { get; set; }
     }
 }
