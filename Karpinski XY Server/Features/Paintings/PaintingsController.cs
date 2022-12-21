@@ -45,18 +45,25 @@ namespace Karpinski_XY_Server.Features.Paintings
         public async Task<ActionResult>Update(PaintingDto model)
         {
             var updated = await this._paintingsService.Update(model);
-
             return Ok(updated);
         }
 
         [HttpDelete]
         [Route("{id}")]
-        public async Task<ActionResult<bool>> Delete(Guid id)
+        public async Task<ActionResult> Delete(Guid id)
         {
             var paintning = await this._paintingsService.Delete(id);
-            return Ok(paintning.Succeeded);
+            return Ok(paintning);
         }
 
-        
+        [HttpGet]
+        [Route("onfocus")]
+        public async Task<IEnumerable<PaintingDto>> GetPaintingsOnFocus()
+        {
+            return await this._paintingsService.GetPaitingsOnFocus();
+        }
+
+
+
     }
 }
