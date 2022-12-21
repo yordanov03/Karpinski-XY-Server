@@ -1,5 +1,4 @@
 using Karpinski_XY.Infrastructure.Extensions;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.FileProviders;
 
@@ -9,7 +8,7 @@ builder.Services
     .AddDatabase(builder.Configuration)
     .AddIdentity()
     .AddJWTAuthentication(builder.Services.GetApplicationSettings(builder.Configuration))
-    .AddAutoMapper()
+    .AddAutoMapperConfiguration()
     .AddSwaggerGen()
     .AddApplicationServices();
 

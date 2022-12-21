@@ -84,10 +84,24 @@ namespace Karpinski_XY_Server.Features.Paintings
             return true;
         }
 
+        public async Task<IEnumerable<PaintingDto>> GetPaitingsOnFocus()
+        {
+            var paintings = await this._context
+             .Paintings
+             .Where(p => p.IsAvailableToSell && p.IsDeleted == false && p.OnFocus == true)
+             .OrderByDescending(p=>p.CreatedOn)
+             .ToListAsync();
+
+            var mapped = this._mapper.Map<List<Painting>, IEnumerable<PaintingDto>>(paintings);
+            return mapped;
+        }
+
         private Painting FindPaintingById(Guid id)
         => this._context
             .Paintings
             .Where(p => p.Id == id)
             .FirstOrDefault();
+
+ 
     }
 }

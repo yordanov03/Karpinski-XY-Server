@@ -7,6 +7,7 @@ namespace Karpinski_XY_Server.Features.Paintings
     {
         public Task<IEnumerable<PaintingDto>> GetAllPaitings();
         public Task<IEnumerable<PaintingDto>> GetAvailablePaitings();
+        public Task<IEnumerable<PaintingDto>> GetPaitingsOnFocus();
         public Task<IEnumerable<PaintingDto>> GetPortfolioPaitings();
         public Task<PaintingDto> GetPaitingById(Guid id);
         public Task<Result> Create(PaintingDto model);
