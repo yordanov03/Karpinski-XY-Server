@@ -8,6 +8,7 @@ builder.Services
     .AddDatabase(builder.Configuration)
     .AddIdentity()
     .AddJWTAuthentication(builder.Services.GetApplicationSettings(builder.Configuration))
+    .AddSmtpSettings(builder.Configuration)
     .AddAutoMapperConfiguration()
     .AddSwaggerGen()
     .AddApplicationServices();
