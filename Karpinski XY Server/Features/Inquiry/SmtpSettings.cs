@@ -1,4 +1,4 @@
-﻿namespace Karpinski_XY_Server.Features.Inquery
+﻿namespace Karpinski_XY_Server.Features.inquiry
 {
     public class SmtpSettings
     {

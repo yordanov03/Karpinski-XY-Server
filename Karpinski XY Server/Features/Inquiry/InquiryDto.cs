@@ -1,6 +1,6 @@
-﻿namespace Karpinski_XY_Server.Features.Inquery
+﻿namespace Karpinski_XY_Server.Features.inquiry
 {
-    public class InqueryDto
+    public class inquiryDto
     {
         public string Name { get; set; }
         public string Email { get; set; }

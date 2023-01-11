@@ -4,29 +4,29 @@ using System.Net;
 using MimeKit;
 using MailKit.Net.Smtp;
 
-namespace Karpinski_XY_Server.Features.Inquery
+namespace Karpinski_XY_Server.Features.inquiry
 {
-    public class InqueryEmailSenderService : IInqueryEmailSenderService
+    public class inquiryEmailSenderService : IinquiryEmailSenderService
     {
         private readonly SmtpSettings _smtpSettings;
 
-        public InqueryEmailSenderService(IOptions<SmtpSettings> smtpSettings)
+        public inquiryEmailSenderService(IOptions<SmtpSettings> smtpSettings)
         {
             _smtpSettings = smtpSettings.Value;
         }
 
-        public async Task<string> SendEmailAsync(InqueryDto inquery)
+        public async Task<string> SendEmailAsync(inquiryDto inquiry)
         {
             var caseNumber = new Random().Next(100,99999);
 
             // send message to Requestor
             var messageToRequestor = new MimeMessage();
             messageToRequestor.From.Add(MailboxAddress.Parse(_smtpSettings.SenderEmail));
-            messageToRequestor.To.Add(MailboxAddress.Parse(inquery.Email));
-            messageToRequestor.Subject = $"Inquery: {caseNumber} " + inquery.Subject;
+            messageToRequestor.To.Add(MailboxAddress.Parse(inquiry.Email));
+            messageToRequestor.Subject = $"inquiry: {caseNumber} " + inquiry.Subject;
             messageToRequestor.Body = new TextPart("plain")
             {
-                Text = EmailTemplates.RequestorConfirmationTemplate(inquery.Name, caseNumber)
+                Text = EmailTemplates.RequestorConfirmationTemplate(inquiry.Name, caseNumber)
             };
 
 
@@ -35,10 +35,10 @@ namespace Karpinski_XY_Server.Features.Inquery
             var messageToArtist = new MimeMessage();
             messageToArtist.From.Add(MailboxAddress.Parse(_smtpSettings.SenderEmail));
             messageToArtist.To.Add(MailboxAddress.Parse("svetoslav.yordanov.003@gmail.com"));
-            messageToArtist.Subject = $"Inquery: {caseNumber} " + inquery.Subject;
+            messageToArtist.Subject = $"inquiry: {caseNumber} " + inquiry.Subject;
             messageToArtist.Body = new TextPart("plain")
             {
-                Text = EmailTemplates.NotificationToArtist(inquery, caseNumber)
+                Text = EmailTemplates.NotificationToArtist(inquiry, caseNumber)
             };
 
 

@@ -1,7 +1,7 @@
 ﻿using Karpinski_XY.Data;
 using Karpinski_XY.Infrastructure.Filters;
 using Karpinski_XY.Models;
-using Karpinski_XY_Server.Features.Inquery;
+using Karpinski_XY_Server.Features.inquiry;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
