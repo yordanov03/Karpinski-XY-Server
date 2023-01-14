@@ -1,6 +1,7 @@
 ﻿using Karpinski_XY.Data;
 using Karpinski_XY.Infrastructure.Filters;
 using Karpinski_XY.Models;
+using Karpinski_XY_Server.Features.Inquiry.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -19,10 +20,12 @@ namespace Karpinski_XY.Infrastructure.Extensions
             return appSettings;
         }
 
+
         public static IServiceCollection AddDatabase(
             this IServiceCollection services, IConfiguration configuration)
             => services.AddDbContext<ApplicationDbContext>(options => options
-            .UseSqlServer(configuration.GetConnectionString("DefaultConnection")).UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
+            .UseSqlServer(configuration.GetConnectionString("DefaultConnection"))
+            .UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking));
 
         public static IServiceCollection AddIdentity(this IServiceCollection services)
         {
@@ -62,6 +65,9 @@ namespace Karpinski_XY.Infrastructure.Extensions
                 });
             return services;
         }
+
+        public static IServiceCollection AddSmtpSettings(this IServiceCollection services, IConfiguration configuration)
+        => services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
 
         public static void AddApplicationServices(this IServiceCollection services)
              => services.RegisterAssemblyPublicNonGenericClasses()

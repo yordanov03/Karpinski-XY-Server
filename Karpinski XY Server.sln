@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Karpinski XY Server", "Karpinski XY Server\Karpinski XY Server.csproj", "{613D042C-2061-471A-9E1B-05E37088E7AD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Karpinski XY Server", "Karpinski XY Server\Karpinski XY Server.csproj", "{613D042C-2061-471A-9E1B-05E37088E7AD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
