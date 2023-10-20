@@ -1,6 +1,7 @@
 ﻿using Karpinski_XY.Features;
 using Karpinski_XY.Infrastructure.Services;
 using Karpinski_XY_Server.Features.Paintings.Models;
+using Karpinski_XY_Server.Features.Paintings.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
 
@@ -29,14 +30,14 @@ namespace Karpinski_XY_Server.Features.Paintings
         [Route("available")]
         public async Task <IEnumerable<PaintingDto>> GetAvailablePaintings()
         {
-            return await this._paintingsService.GetAvailablePaitings();
+            return await this._paintingsService.GetAvailablePaintings();
         }
 
         [HttpGet]
         [Route("{id}")]
         public async Task<ActionResult<PaintingDto>> Details(Guid id)
         {
-            var painting = await this._paintingsService.GetPaitingById(id);
+            var painting = await this._paintingsService.GetPaintingById(id);
             return painting;
         }
 
@@ -60,7 +61,7 @@ namespace Karpinski_XY_Server.Features.Paintings
         [Route("onfocus")]
         public async Task<IEnumerable<PaintingDto>> GetPaintingsOnFocus()
         {
-            return await this._paintingsService.GetPaitingsOnFocus();
+            return await this._paintingsService.GetPaintingsOnFocus();
         }
 
 
