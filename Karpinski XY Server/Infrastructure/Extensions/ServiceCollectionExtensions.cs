@@ -79,5 +79,14 @@ namespace Karpinski_XY.Infrastructure.Extensions
 
         public static IServiceCollection AddAutoMapperConfiguration(this IServiceCollection services)
             => services.AddAutoMapper(typeof(Program));
+
+        public static string SchemaSuffixStrategy(Type currentClass)
+        {
+            string suffix = "DTO";
+            string returnedValue = currentClass.Name;
+            if(returnedValue.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)) 
+            returnedValue = returnedValue.Replace(suffix, string.Empty, StringComparison.OrdinalIgnoreCase);
+            return returnedValue;
+        }
     }
 }

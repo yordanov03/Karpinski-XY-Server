@@ -1,6 +1,7 @@
 using Karpinski_XY.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +11,11 @@ builder.Services
     .AddJWTAuthentication(builder.Services.GetApplicationSettings(builder.Configuration))
     .AddSmtpSettings(builder.Configuration)
     .AddAutoMapperConfiguration()
-    .AddSwaggerGen()
+    .AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Karpinski", Version="v1"});
+        c.CustomSchemaIds(Karpinski_XY.Infrastructure.Extensions.ServiceCollectionExtensions.SchemaSuffixStrategy);
+    })
     .AddApplicationServices();
 
 builder.Services.Configure<FormOptions>(o =>
@@ -42,7 +47,7 @@ app.UseCors(options => options
 .AllowAnyMethod()
 .AllowAnyHeader());
 
-
+app.UseHttpMethodOverride();
 app.UseStaticFiles();
 app.UseStaticFiles(new StaticFileOptions()
 {

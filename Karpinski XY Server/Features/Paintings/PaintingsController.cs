@@ -1,9 +1,7 @@
 ﻿using Karpinski_XY.Features;
-using Karpinski_XY.Infrastructure.Services;
 using Karpinski_XY_Server.Features.Paintings.Models;
 using Karpinski_XY_Server.Features.Paintings.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Net.Http.Headers;
 
 namespace Karpinski_XY_Server.Features.Paintings
 {
@@ -16,55 +14,56 @@ namespace Karpinski_XY_Server.Features.Paintings
             this._paintingsService = paintingsService;
         }
 
-        [HttpPost, DisableRequestSizeLimit]
-        [Route(nameof(Create))]
+        [HttpPost]
+        [DisableRequestSizeLimit]
+        [Route("", Name ="create")]
+        [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
         public async Task<ActionResult<Guid>> Create(PaintingDto model)
         {
-            var result =  await this._paintingsService.Create(model);
-
+            await this._paintingsService.Create(model);
             return Ok();
-
         }
 
         [HttpGet]
-        [Route("available")]
-        public async Task <IEnumerable<PaintingDto>> GetAvailablePaintings()
+        [Route("available", Name = "available")]
+        [ProducesResponseType(typeof(List<PaintingDto>), StatusCodes.Status200OK)]
+        public async Task<IEnumerable<PaintingDto>> GetAvailablePaintings()
         {
             return await this._paintingsService.GetAvailablePaintings();
         }
 
         [HttpGet]
-        [Route("{id}")]
+        [Route("{id}", Name = "getPainting")]
+        [ProducesResponseType(typeof(PaintingDto), StatusCodes.Status200OK)]
         public async Task<ActionResult<PaintingDto>> Details(Guid id)
         {
-            var painting = await this._paintingsService.GetPaintingById(id);
-            return painting;
+            return await this._paintingsService.GetPaintingById(id);
         }
 
         [HttpPut]
-        [Route("update")]
-        public async Task<ActionResult>Update(PaintingDto model)
+        [Route("", Name = "update")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<ActionResult> Update(PaintingDto model)
         {
             var updated = await this._paintingsService.Update(model);
             return Ok(updated);
         }
 
         [HttpDelete]
-        [Route("{id}")]
+        [Route("{id}", Name = "delete")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<ActionResult> Delete(Guid id)
         {
-            var paintning = await this._paintingsService.Delete(id);
-            return Ok(paintning);
+            var painting = await this._paintingsService.Delete(id);
+            return Ok(painting);
         }
 
         [HttpGet]
-        [Route("onfocus")]
+        [Route("", Name = "onFocus")]
+        [ProducesResponseType(typeof(List<PaintingDto>), StatusCodes.Status200OK)]
         public async Task<IEnumerable<PaintingDto>> GetPaintingsOnFocus()
         {
             return await this._paintingsService.GetPaintingsOnFocus();
         }
-
-
-
     }
 }
