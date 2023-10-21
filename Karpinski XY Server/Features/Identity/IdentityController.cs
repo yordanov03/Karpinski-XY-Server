@@ -1,76 +1,40 @@
 ﻿using Karpinski_XY.Features.Identity.Models;
-using Karpinski_XY.Infrastructure.Services;
 using Karpinski_XY.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace Karpinski_XY.Features.Identity
 {
     public class IdentityController : ApiController
     {
-        private readonly UserManager<User> userManager;
-        private readonly AppSettings appSettings;
-        private SignInManager<User> singInManager;
         private readonly IIdentityService identityService;
 
-        public IdentityController(UserManager<User> userManager,
-            SignInManager<User> singInManager,
-            IOptions<AppSettings> appSettings,
-            IIdentityService identityService)
+        public IdentityController(IIdentityService identityService)
         {
-            this.userManager = userManager;
-            this.appSettings = appSettings.Value;
             this.identityService = identityService;
-            this.singInManager = singInManager;
         }
 
         [HttpPost]
-        [Route(nameof(Register))]
+        [Route("register", Name ="regsiter")]
         [AllowAnonymous]
         public async Task<IdentityResult> Register(RegisterRequestModel model)
         {
-            //var userExists = await userManager.FindByNameAsync(model.Username);
-
-            //if (userExists != null)
-            //{
-            //    return BadRequest("User exists");
-            //}
-
-            var user = new User
-            {
-                Email = model.Email,
-                UserName = model.Username
-            };
-            var result = await userManager.CreateAsync(user, model.Password);
-
-            return result;
-
+            return await this.identityService.RegisterAsync(model);
         }
 
         [HttpPost]
-        [Route(nameof(Login))]
+        [Route("login", Name ="login")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(object))]
         [AllowAnonymous]
-        public async Task<object> Login(LoginRequestModel model)
+        public async Task<IActionResult> Login(LoginRequestModel model)
         {
-            //var someuser = this.singInManager.SignInAsync();
-            var user = await userManager.FindByNameAsync(model.Username);
-
-            if (user == null)
+            var result = await identityService.LoginAsync(model);
+            if (result.IdentityResult.Succeeded)
             {
-                return Unauthorized("No such user or wrong password");
+                return Ok(result);
             }
-
-            var passwordValid = await userManager.CheckPasswordAsync(user, model.Password);
-
-            if (!passwordValid)
-            {
-                return Unauthorized("Invalid password");
-            }
-
-            var token = this.identityService.GenerateJWTToken(user, this.appSettings.Secret);
-            return Ok(new { Token = token, Username = user.UserName, Id = user.Id });
+            return Unauthorized(result.IdentityResult.Errors);
         }
     }
 }

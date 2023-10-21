@@ -1,5 +1,5 @@
-﻿using Karpinski_XY.Infrastructure.Services;
-using Karpinski_XY_Server.Features.Paintings.Models;
+﻿using Karpinski_XY_Server.Features.Paintings.Models;
+using Karpinski_XY_Server.Infrastructure.Services;
 
 namespace Karpinski_XY_Server.Features.Paintings.Services
 {

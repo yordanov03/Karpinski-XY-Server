@@ -6,14 +6,16 @@ namespace Karpinski_XY_Server.Features.inquiry
 {
     public class InquiryController : ApiController
     {
-        private readonly IinquiryEmailSenderService _inquiryEmailSender;
+        private readonly IInquiryEmailSenderService _inquiryEmailSender;
 
-        public InquiryController(IinquiryEmailSenderService inquiryEmailSender)
+        public InquiryController(IInquiryEmailSenderService inquiryEmailSender)
         {
             this._inquiryEmailSender = inquiryEmailSender;
         }
 
         [HttpPost]
+        [Route("", Name ="registerInquiry")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         public async Task<IActionResult> Registerinquiry(InquiryDto inquiry)
         {
             var result = await this._inquiryEmailSender.SendEmailAsync(inquiry);

@@ -1,4 +1,4 @@
-﻿namespace Karpinski_XY.Infrastructure.Services
+﻿namespace Karpinski_XY_Server.Infrastructure.Services
 {
     public class Result
     {
@@ -11,8 +11,8 @@
             => new Result { Succeeded = succeeded };
 
         public static implicit operator Result(string error)
-            => new Result 
-            { 
+            => new Result
+            {
                 Succeeded = false,
                 Error = error
             };

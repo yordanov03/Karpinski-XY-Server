@@ -2,7 +2,7 @@
 
 namespace Karpinski_XY_Server.Features.inquiry
 {
-    public interface IinquiryEmailSenderService
+    public interface IInquiryEmailSenderService
     {
         Task<string> SendEmailAsync(InquiryDto inquiry);
     }
