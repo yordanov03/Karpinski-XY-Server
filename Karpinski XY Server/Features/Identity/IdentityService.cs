@@ -1,6 +1,7 @@
 ﻿using Karpinski_XY.Features.Identity.Models;
 using Karpinski_XY.Models;
 using Karpinski_XY_Server.Features.Identity.Models;
+using Karpinski_XY_Server.Infrastructure.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -25,21 +26,14 @@ namespace Karpinski_XY.Features.Identity
             this.logger = logger;
         }
 
-        public async Task<LoginResponseModel> LoginAsync(LoginRequestModel model)
+        public async Task<Result<LoginResponseModel>> LoginAsync(LoginRequestModel model)
         {
-            var responseModel = new LoginResponseModel();
             var user = await userManager.FindByNameAsync(model.Username);
 
             if (user == null)
             {
                 logger.LogWarning("Login failed for user {Username}: User not found.", model.Username);
-
-                responseModel.IdentityResult = IdentityResult.Failed(new IdentityError
-                {
-                    Description = "No such user or wrong password"
-                });
-
-                return responseModel;
+                return Result<LoginResponseModel>.Fail("No such user or wrong password");
             }
 
             var passwordValid = await userManager.CheckPasswordAsync(user, model.Password);
@@ -47,47 +41,44 @@ namespace Karpinski_XY.Features.Identity
             if (!passwordValid)
             {
                 logger.LogWarning("Login failed for user {Username}: Invalid password.", model.Username);
-
-                responseModel.IdentityResult = IdentityResult.Failed(new IdentityError
-                {
-                    Description = "Invalid password"
-                });
-
-                return responseModel;
+                return Result<LoginResponseModel>.Fail("Invalid password");
             }
 
             var token = this.GenerateJWTToken(user, appSettings.Secret);
 
-            responseModel.Token = token;
-            responseModel.Username = user.UserName;
-            responseModel.Id = user.Id.ToString();
-            responseModel.IdentityResult = IdentityResult.Success;
+            var responseModel = new LoginResponseModel
+            {
+                Token = token,
+                Username = user.UserName,
+                Id = user.Id.ToString()
+            };
 
             logger.LogInformation("Login successful for user {Username}.", model.Username);
 
-            return responseModel;
+            return Result<LoginResponseModel>.Success(responseModel);
         }
 
-        public async Task<IdentityResult> RegisterAsync(RegisterRequestModel model)
+        public async Task<Result<IdentityResult>> RegisterAsync(RegisterRequestModel model)
         {
             var user = new User
             {
                 Email = model.Email,
                 UserName = model.Username
             };
-            var result = await userManager.CreateAsync(user, model.Password);
+            var identityResult = await userManager.CreateAsync(user, model.Password);
 
-            if (result.Succeeded)
+            if (identityResult.Succeeded)
             {
                 logger.LogInformation("User {Username} registered successfully.", model.Username);
+                return Result<IdentityResult>.Success(identityResult);
             }
             else
             {
-                logger.LogWarning("Registration failed for user {Username}. Errors: {Errors}", model.Username, string.Join(", ", result.Errors));
+                logger.LogWarning("Registration failed for user {Username}. Errors: {Errors}", model.Username, string.Join(", ", identityResult.Errors));
+                return Result<IdentityResult>.Fail(string.Join(", ", identityResult.Errors.Select(e => e.Description)));
             }
-
-            return result;
         }
+
 
         private string GenerateJWTToken(User user, string secret)
         {

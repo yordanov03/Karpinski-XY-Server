@@ -1,4 +1,5 @@
 using Karpinski_XY.Infrastructure.Extensions;
+using Karpinski_XY_Server.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.OpenApi.Models;
@@ -54,6 +55,8 @@ app.UseCors(options => options
 .AllowAnyMethod()
 .AllowAnyHeader());
 
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpMethodOverride();
 app.UseStaticFiles();
 app.UseStaticFiles(new StaticFileOptions()

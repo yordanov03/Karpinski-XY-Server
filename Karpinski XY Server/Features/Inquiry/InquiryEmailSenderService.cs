@@ -3,6 +3,7 @@ using System.Net;
 using MimeKit;
 using Karpinski_XY_Server.Features.Inquiry.Models;
 using System.Net.Mail;
+using Karpinski_XY_Server.Infrastructure.Services;
 
 namespace Karpinski_XY_Server.Features.inquiry
 {
@@ -12,16 +13,17 @@ namespace Karpinski_XY_Server.Features.inquiry
         private readonly ILogger<InquiryEmailSenderService> _logger;
         private static readonly Random _random = new Random();
 
-        public InquiryEmailSenderService(IOptions<SmtpSettings> smtpSettings, 
+        public InquiryEmailSenderService(IOptions<SmtpSettings> smtpSettings,
             ILogger<InquiryEmailSenderService> logger)
         {
             _smtpSettings = smtpSettings.Value;
             _logger = logger;
         }
 
-        public async Task<string> SendEmailAsync(InquiryDto inquiry)
+        public async Task<Result<string>> SendEmailAsync(InquiryDto inquiry)
         {
             var caseNumber = _random.Next(100, 99999);
+            var emailResult = new Result<string>();
 
             var messageToRequestor = new MimeMessage();
             messageToRequestor.From.Add(MailboxAddress.Parse(_smtpSettings.SenderEmail));
@@ -43,18 +45,21 @@ namespace Karpinski_XY_Server.Features.inquiry
                     await client.DisconnectAsync(true);
                 }
 
-                return "Email Sent Successfully";
+                emailResult = Result<string>.Success("Email Sent Successfully");
             }
             catch (SmtpException ex)
             {
                 _logger.LogError(ex, "An SMTP error occurred while sending email to {Email}", inquiry.Email);
-                throw;
+                emailResult = Result<string>.Fail($"SMTP Error: {ex.Message}");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unknown error occurred while sending email to {Email}", inquiry.Email);
-                throw;
+                emailResult = Result<string>.Fail($"Unknown Error: {ex.Message}");
             }
+
+            return emailResult;
         }
+
     }
 }

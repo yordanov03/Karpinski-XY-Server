@@ -16,54 +16,92 @@ namespace Karpinski_XY_Server.Features.Paintings
 
         [HttpPost]
         [DisableRequestSizeLimit]
-        [Route("", Name ="create")]
-        [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
-        public async Task<ActionResult<Guid>> Create(PaintingDto model)
+        [Route("", Name = "create")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Create(PaintingDto model)
         {
-            await this._paintingsService.Create(model);
-            return Ok();
+            var result = await _paintingsService.Create(model);
+            if (result.Succeeded)
+            {
+                return Ok(result.Value);
+            }
+
+            return BadRequest(result.Errors);
         }
 
         [HttpGet]
         [Route("available", Name = "available")]
-        [ProducesResponseType(typeof(List<PaintingDto>), StatusCodes.Status200OK)]
-        public async Task<IEnumerable<PaintingDto>> GetAvailablePaintings()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAvailablePaintings()
         {
-            return await this._paintingsService.GetAvailablePaintings();
+            var result = await _paintingsService.GetAvailablePaintings();
+            if (result.Succeeded)
+            {
+                return Ok(result.Value);
+            }
+
+            return BadRequest(result.Errors);
         }
 
         [HttpGet]
         [Route("{id}", Name = "getPainting")]
-        [ProducesResponseType(typeof(PaintingDto), StatusCodes.Status200OK)]
-        public async Task<ActionResult<PaintingDto>> Details(Guid id)
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Details(Guid id)
         {
-            return await this._paintingsService.GetPaintingById(id);
+            var result = await _paintingsService.GetPaintingById(id);
+            if (result.Succeeded)
+            {
+                return Ok(result.Value);
+            }
+
+            return BadRequest(result.Errors);
         }
 
         [HttpPut]
         [Route("", Name = "update")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult> Update(PaintingDto model)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Update(PaintingDto model)
         {
-            var updated = await this._paintingsService.Update(model);
-            return Ok(updated);
+            var result = await _paintingsService.Update(model);
+            if (result.Succeeded)
+            {
+                return Ok(result.Value);
+            }
+
+            return BadRequest(result.Errors);
         }
 
         [HttpDelete]
         [Route("{id}", Name = "delete")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<ActionResult> Delete(Guid id)
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Delete(Guid id)
         {
-            var painting = await this._paintingsService.Delete(id);
-            return Ok(painting);
+            var result = await _paintingsService.Delete(id);
+            if (result.Succeeded)
+            {
+                return Ok(result.Value);
+            }
+
+            return BadRequest(result.Errors);
         }
 
         [HttpGet]
         [Route("", Name = "onFocus")]
-        [ProducesResponseType(typeof(List<PaintingDto>), StatusCodes.Status200OK)]
-        public async Task<IEnumerable<PaintingDto>> GetPaintingsOnFocus()
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetPaintingsOnFocus()
         {
-            return await this._paintingsService.GetPaintingsOnFocus();
+            var result = await _paintingsService.GetPaintingsOnFocus();
+            if (result.Succeeded)
+            {
+                return Ok(result.Value);
+            }
+
+            return BadRequest(result.Errors);
         }
     }
 }

@@ -1,20 +1,38 @@
 ﻿namespace Karpinski_XY_Server.Infrastructure.Services
 {
-    public class Result
+    public class Result<T>
     {
+        public Result()
+        {
+            Errors = new List<string>();
+        }
+
         public bool Succeeded { get; private set; }
         public bool Failure => !this.Succeeded;
+        public T Value { get; private set; }
+        public IReadOnlyList<string> Errors { get; private set; }
 
-        public string Error { get; private set; }
+        public static Result<T> Success(T value)
+        {
+            return new Result<T>
+            {
+                Succeeded = true,
+                Value = value
+            };
+        }
 
-        public static implicit operator Result(bool succeeded)
-            => new Result { Succeeded = succeeded };
-
-        public static implicit operator Result(string error)
-            => new Result
+        public static Result<T> Fail(IEnumerable<string> errors)
+        {
+            return new Result<T>
             {
                 Succeeded = false,
-                Error = error
+                Errors = errors.ToList()
             };
+        }
+
+        public static Result<T> Fail(string error)
+        {
+            return Fail(new List<string> { error });
+        }
     }
 }

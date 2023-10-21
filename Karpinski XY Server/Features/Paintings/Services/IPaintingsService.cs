@@ -5,13 +5,13 @@ namespace Karpinski_XY_Server.Features.Paintings.Services
 {
     public interface IPaintingsService
     {
-        public Task<IEnumerable<PaintingDto>> GetAllPaintings();
-        public Task<IEnumerable<PaintingDto>> GetAvailablePaintings();
-        public Task<IEnumerable<PaintingDto>> GetPaintingsOnFocus();
-        public Task<IEnumerable<PaintingDto>> GetPortfolioPaintings();
-        public Task<PaintingDto> GetPaintingById(Guid id);
-        public Task<Result> Create(PaintingDto model);
-        public Task<Result> Update(PaintingDto model);
-        public Task<Result> Delete(Guid id);
+        public Task<Result<IEnumerable<PaintingDto>>> GetAllPaintings();
+        public Task<Result<IEnumerable<PaintingDto>>> GetAvailablePaintings();
+        public Task<Result<IEnumerable<PaintingDto>>> GetPaintingsOnFocus();
+        public Task<Result<IEnumerable<PaintingDto>>> GetPortfolioPaintings();
+        public Task<Result<PaintingDto>> GetPaintingById(Guid id);
+        public Task<Result<Guid>> Create(PaintingDto model);
+        public Task<Result<PaintingDto>> Update(PaintingDto model);
+        public Task<Result<bool>> Delete(Guid id);
     }
 }

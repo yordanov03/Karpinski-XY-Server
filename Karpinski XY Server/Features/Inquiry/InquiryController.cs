@@ -16,10 +16,16 @@ namespace Karpinski_XY_Server.Features.inquiry
         [HttpPost]
         [Route("", Name ="registerInquiry")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> Registerinquiry(InquiryDto inquiry)
+        public async Task<IActionResult> RegisterInquiryEmail([FromBody] InquiryDto inquiry)
         {
-            var result = await this._inquiryEmailSender.SendEmailAsync(inquiry);
-            return Ok();
+            var result = await _inquiryEmailSender.SendEmailAsync(inquiry);
+
+            if (result.Succeeded)
+            {
+                return Ok(result.Value);
+            }
+
+            return BadRequest(result.Errors);
         }
     }
 }

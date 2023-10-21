@@ -1,7 +1,6 @@
 ﻿using Karpinski_XY.Features.Identity.Models;
-using Karpinski_XY.Models;
+using Karpinski_XY_Server.Features.Identity.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Karpinski_XY.Features.Identity
@@ -16,25 +15,33 @@ namespace Karpinski_XY.Features.Identity
         }
 
         [HttpPost]
-        [Route("register", Name ="regsiter")]
+        [Route("register", Name = "regsiter")]
         [AllowAnonymous]
-        public async Task<IdentityResult> Register(RegisterRequestModel model)
+        public async Task<IActionResult> Register(RegisterRequestModel model)
         {
-            return await this.identityService.RegisterAsync(model);
+            var result = await this.identityService.RegisterAsync(model);
+
+            if (result.Succeeded)
+            {
+                return Ok(result.Value);
+            }
+            return BadRequest(result.Errors);
         }
 
         [HttpPost]
-        [Route("login", Name ="login")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(object))]
+        [Route("login", Name = "login")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(LoginResponseModel))]
         [AllowAnonymous]
         public async Task<IActionResult> Login(LoginRequestModel model)
         {
             var result = await identityService.LoginAsync(model);
-            if (result.IdentityResult.Succeeded)
+
+            if (result.Succeeded)
             {
-                return Ok(result);
+                return Ok(result.Value);
             }
-            return Unauthorized(result.IdentityResult.Errors);
+            return Unauthorized(result.Errors);
         }
+
     }
 }
