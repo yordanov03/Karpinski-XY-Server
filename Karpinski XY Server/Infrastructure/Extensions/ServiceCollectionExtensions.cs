@@ -2,6 +2,7 @@
 using Karpinski_XY.Infrastructure.Filters;
 using Karpinski_XY.Models;
 using Karpinski_XY_Server.Features.Inquiry.Models;
+using Karpinski_XY_Server.Features.Paintings.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -67,7 +68,8 @@ namespace Karpinski_XY.Infrastructure.Extensions
         }
 
         public static IServiceCollection AddSmtpSettings(this IServiceCollection services, IConfiguration configuration)
-        => services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
+        => services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"))
+                    .Configure<PaintingFiles>(configuration.GetSection("PaintingFiles"));
 
         public static void AddApplicationServices(this IServiceCollection services)
              => services.RegisterAssemblyPublicNonGenericClasses()

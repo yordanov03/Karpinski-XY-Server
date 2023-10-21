@@ -28,12 +28,14 @@ namespace Karpinski_XY_Server.Features.Paintings.Services
         public async Task<Result> Create(PaintingDto model)
         {
             _logger.LogInformation("Creating a new painting");
+
             model.Id = Guid.NewGuid();
             var updatedPaintingPictures = await _fileService.UpdateImagePathsAsync(model.PaintingPictures);
             model.PaintingPictures = updatedPaintingPictures;
             var painting = _mapper.Map<Painting>(model);
             _context.Add(painting);
             await _context.SaveChangesAsync();
+
             _logger.LogInformation("Successfully created a new painting");
             return true;
         }
@@ -41,6 +43,7 @@ namespace Karpinski_XY_Server.Features.Paintings.Services
         public async Task<IEnumerable<PaintingDto>> GetAllPaintings()
         {
             _logger.LogInformation("Fetching all paintings");
+
             var paintings = await _context
                 .Paintings
                 .Where(p => !p.IsDeleted)
@@ -52,6 +55,7 @@ namespace Karpinski_XY_Server.Features.Paintings.Services
         public async Task<IEnumerable<PaintingDto>> GetAvailablePaintings()
         {
             _logger.LogInformation("Fetching all available paintings");
+
             var paintings = await _context
                 .Paintings
                 .Where(p => p.IsAvailableToSell && p.IsDeleted == false)
@@ -64,6 +68,7 @@ namespace Karpinski_XY_Server.Features.Paintings.Services
         public async Task<PaintingDto> GetPaintingById(Guid id)
         {
             _logger.LogInformation($"Fetching paiting with id {id}");
+
             var painting = FindPaintingById(id);
             return _mapper.Map<PaintingDto>(painting);
         }
@@ -71,6 +76,7 @@ namespace Karpinski_XY_Server.Features.Paintings.Services
         public async Task<IEnumerable<PaintingDto>> GetPortfolioPaintings()
         {
             _logger.LogInformation("Fetching portoflio paintings");
+
             var paintings = await _context
                 .Paintings
                 .Where(p => !p.IsAvailableToSell)
@@ -81,23 +87,32 @@ namespace Karpinski_XY_Server.Features.Paintings.Services
 
         public async Task<Result> Update(PaintingDto model)
         {
-            _logger.LogInformation($"Updating painting with {model.Id}");
+            _logger.LogInformation($"Looking to update paiting with id {model.Id}");
             var painting = FindPaintingById(model.Id);
-            var updatedPainting = _mapper.Map<Painting>(model);
+            if (painting == null)
+            {
+                _logger.LogWarning($"Painting with ID {model.Id} not found.");
+                return false; 
+            }
 
-            _context.Update(updatedPainting);
+            _mapper.Map(model, painting);
+
+            _context.Update(painting);
             await _context.SaveChangesAsync();
             _logger.LogInformation($"Updated painting successfully");
             return true;
+
         }
 
         public async Task<Result> Delete(Guid id)
         {
             _logger.LogInformation($"Deleting painting with {id}");
+
             var painting = FindPaintingById(id);
             painting.IsDeleted = true;
             _context.Update(painting);
             await _context.SaveChangesAsync();
+
             _logger.LogInformation($"Deleted painting successfully");
             return true;
         }

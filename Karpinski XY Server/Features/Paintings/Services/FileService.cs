@@ -1,18 +1,18 @@
-﻿using Microsoft.Extensions.Logging;
-using Karpinski_XY_Server.Features.Paintings.Models;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
+﻿using Karpinski_XY_Server.Features.Paintings.Models;
+using Microsoft.Extensions.Options;
 
 namespace Karpinski_XY_Server.Features.Paintings.Services
 {
     public class FileService : IFileService
     {
         private readonly ILogger<FileService> _logger;
+        private readonly PaintingFiles _paintingFiles;
 
-        public FileService(ILogger<FileService> logger)
+        public FileService(ILogger<FileService> logger,
+            IOptions<PaintingFiles> paintingFiles)
         {
             _logger = logger;
+            _paintingFiles = paintingFiles.Value;
         }
 
         public async Task<List<PaintingPictureDto>> UpdateImagePathsAsync(List<PaintingPictureDto> paintingPictures)
@@ -24,7 +24,7 @@ namespace Karpinski_XY_Server.Features.Paintings.Services
                 try
                 {
                     string fileName = Path.GetFileName(paintingPicture.ImageUrl);
-                    string newPath = Path.Combine("C:\\Users\\sveto\\source\\repos\\Karpinski-XY-Server\\Karpinski XY Server\\Resources\\Images", fileName);
+                    string newPath = Path.Combine(_paintingFiles.Path, fileName);
                     File.Copy(paintingPicture.ImageUrl, newPath);
 
                     paintingPicture.ImageUrl = newPath;

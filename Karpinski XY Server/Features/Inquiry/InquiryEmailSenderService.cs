@@ -12,7 +12,8 @@ namespace Karpinski_XY_Server.Features.inquiry
         private readonly ILogger<InquiryEmailSenderService> _logger;
         private static readonly Random _random = new Random();
 
-        public InquiryEmailSenderService(IOptions<SmtpSettings> smtpSettings, ILogger<InquiryEmailSenderService> logger)
+        public InquiryEmailSenderService(IOptions<SmtpSettings> smtpSettings, 
+            ILogger<InquiryEmailSenderService> logger)
         {
             _smtpSettings = smtpSettings.Value;
             _logger = logger;
@@ -25,7 +26,7 @@ namespace Karpinski_XY_Server.Features.inquiry
             var messageToRequestor = new MimeMessage();
             messageToRequestor.From.Add(MailboxAddress.Parse(_smtpSettings.SenderEmail));
             messageToRequestor.To.Add(MailboxAddress.Parse(inquiry.Email));
-            messageToRequestor.Cc.Add(MailboxAddress.Parse("svetoslav.yordanov.003@gmail.com"));
+            messageToRequestor.Cc.Add(MailboxAddress.Parse(_smtpSettings.CCEmail));
             messageToRequestor.Subject = $"Inquiry: {caseNumber} " + inquiry.Subject;
             messageToRequestor.Body = new TextPart("html") { Text = EmailTemplates.RequestorConfirmationTemplate(inquiry) };
 
