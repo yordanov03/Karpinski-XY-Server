@@ -20,6 +20,7 @@ builder.Services
         c.SwaggerDoc("v1", new OpenApiInfo { Title = "Karpinski", Version="v1"});
         c.CustomSchemaIds(Karpinski_XY.Infrastructure.Extensions.ServiceCollectionExtensions.SchemaSuffixStrategy);
     })
+    .AddApplicationValidators()
     .AddApplicationServices();
 
 builder.Services.Configure<FormOptions>(o =>

@@ -21,7 +21,6 @@ namespace Karpinski_XY_Server.Models
 
         public bool IsDeleted { get; set; } = false;
 
-        [Required]
         public bool IsAvailableToSell { get; set; }
 
         public string ShortDescription { get; set; }

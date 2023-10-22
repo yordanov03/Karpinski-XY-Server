@@ -22,6 +22,7 @@ namespace Karpinski_XY_Server.Features.Paintings
         public async Task<IActionResult> Create(PaintingDto model)
         {
             var result = await _paintingsService.Create(model);
+
             if (result.Succeeded)
             {
                 return Ok(result.Value);

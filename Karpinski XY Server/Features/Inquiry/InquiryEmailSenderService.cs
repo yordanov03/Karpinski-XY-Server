@@ -4,24 +4,36 @@ using MimeKit;
 using Karpinski_XY_Server.Features.Inquiry.Models;
 using System.Net.Mail;
 using Karpinski_XY_Server.Infrastructure.Services;
+using FluentValidation;
 
 namespace Karpinski_XY_Server.Features.inquiry
 {
     public class InquiryEmailSenderService : IInquiryEmailSenderService
     {
         private readonly SmtpSettings _smtpSettings;
+        private readonly IValidator<InquiryDto> _inquiryValidator;
         private readonly ILogger<InquiryEmailSenderService> _logger;
         private static readonly Random _random = new Random();
 
         public InquiryEmailSenderService(IOptions<SmtpSettings> smtpSettings,
+            IValidator<InquiryDto> inquiryValidator,
             ILogger<InquiryEmailSenderService> logger)
         {
             _smtpSettings = smtpSettings.Value;
+            _inquiryValidator = inquiryValidator;
             _logger = logger;
         }
 
         public async Task<Result<string>> SendEmailAsync(InquiryDto inquiry)
         {
+            var validationResult = _inquiryValidator.Validate(inquiry);
+            if (!validationResult.IsValid)
+            {
+                var errorMessages = validationResult.Errors.Select(e => e.ErrorMessage);
+                _logger.LogError("Validation failed for inquiry. Errors: {ValidationErrors}", string.Join(", ", errorMessages));
+                return Result<string>.Fail(validationResult.Errors.Select(e => e.ErrorMessage));
+            }
+
             var caseNumber = _random.Next(100, 99999);
             var emailResult = new Result<string>();
 

@@ -1,5 +1,7 @@
-﻿using Karpinski_XY_Server.Features.Paintings.Models;
+﻿using FluentValidation;
+using Karpinski_XY_Server.Features.Paintings.Models;
 using Karpinski_XY_Server.Infrastructure.Services;
+using Karpinski_XY_Server.Validators;
 using Microsoft.Extensions.Options;
 
 namespace Karpinski_XY_Server.Features.Paintings.Services
@@ -8,11 +10,15 @@ namespace Karpinski_XY_Server.Features.Paintings.Services
     {
         private readonly ILogger<FileService> _logger;
         private readonly PaintingFiles _paintingFiles;
+        private readonly IValidator<PaintingPictureDto> _paintingPictureDtoValidator;
 
-        public FileService(ILogger<FileService> logger, IOptions<PaintingFiles> paintingFiles)
+        public FileService(ILogger<FileService> logger, 
+            IOptions<PaintingFiles> paintingFiles,
+            IValidator<PaintingPictureDto> paintingPictureDtoValidator)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _paintingFiles = paintingFiles.Value;
+            _paintingPictureDtoValidator = paintingPictureDtoValidator;
         }
 
         public Task<Result<List<PaintingPictureDto>>> UpdateImagePathsAsync(List<PaintingPictureDto> paintingPictures)
@@ -32,15 +38,24 @@ namespace Karpinski_XY_Server.Features.Paintings.Services
 
             _logger.LogInformation("Completed updating image paths for {Count} painting(s).", paintingPictures.Count);
 
-            var result = errors.Count == 0
-            ? Result<List<PaintingPictureDto>>.Success(paintingPictures)
-            : Result<List<PaintingPictureDto>>.Fail(errors);
+            if (errors.Count > 0)
+            {
+                var aggregatedErrors = string.Join(Environment.NewLine, errors);
+                return Task.FromResult(Result<List<PaintingPictureDto>>.Fail(new List<string> { $"Validation failed:{Environment.NewLine}{aggregatedErrors}" }));
+            }
 
-            return Task.FromResult(result);
+            return Task.FromResult(Result<List<PaintingPictureDto>>.Success(paintingPictures));
         }
 
         private string UpdateImagePath(PaintingPictureDto paintingPicture)
         {
+            var validationResult = _paintingPictureDtoValidator.Validate(paintingPicture);
+            if (!validationResult.IsValid)
+            {
+                var aggregatedErrors = string.Join(Environment.NewLine, validationResult.Errors.Select(e => e.ErrorMessage));
+                return $"Validation failed:{Environment.NewLine}{aggregatedErrors}";
+            }
+
             try
             {
                 var fileName = Path.GetFileName(paintingPicture.ImageUrl);
@@ -59,5 +74,6 @@ namespace Karpinski_XY_Server.Features.Paintings.Services
                 return errorMessage;
             }
         }
+
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using FluentValidation;
 using Karpinski_XY.Data;
 using Karpinski_XY_Server.Features.Paintings.Models;
 using Karpinski_XY_Server.Infrastructure.Services;
@@ -10,16 +11,19 @@ namespace Karpinski_XY_Server.Features.Paintings.Services
     public class PaintingsService : IPaintingsService
     {
         private readonly ApplicationDbContext _context;
+        private readonly IValidator<PaintingDto> _paintingValidator;
         private readonly IMapper _mapper;
         private readonly IFileService _fileService;
         private readonly ILogger<PaintingsService> _logger;
 
         public PaintingsService(ApplicationDbContext context,
+            IValidator<PaintingDto> paintingValidator,
             IMapper mapper,
             IFileService fileService,
             ILogger<PaintingsService> logger)
         {
             _context = context;
+            _paintingValidator = paintingValidator;
             _mapper = mapper;
             _fileService = fileService;
             _logger = logger;   
@@ -27,6 +31,15 @@ namespace Karpinski_XY_Server.Features.Paintings.Services
 
         public async Task<Result<Guid>> Create(PaintingDto model)
         {
+            var validationResult = _paintingValidator.Validate(model);
+
+            if (!validationResult.IsValid)
+            {
+                var errorMessages = validationResult.Errors.Select(e => e.ErrorMessage);
+                _logger.LogError("Validation failed for inquiry. Errors: {ValidationErrors}", string.Join(", ", errorMessages));
+                return Result<Guid>.Fail(validationResult.Errors.Select(e => e.ErrorMessage));
+            }
+
             _logger.LogInformation("Creating a new painting");
 
             model.Id = Guid.NewGuid();
@@ -99,6 +112,15 @@ namespace Karpinski_XY_Server.Features.Paintings.Services
 
         public async Task<Result<PaintingDto>> Update(PaintingDto model)
         {
+            var validationResult = _paintingValidator.Validate(model);
+
+            if (!validationResult.IsValid)
+            {
+                var errorMessages = validationResult.Errors.Select(e => e.ErrorMessage);
+                _logger.LogError("Validation failed for inquiry. Errors: {ValidationErrors}", string.Join(", ", errorMessages));
+                return Result<PaintingDto>.Fail(validationResult.Errors.Select(e => e.ErrorMessage));
+            }
+
             _logger.LogInformation($"Looking to update painting with id {model.Id}");
 
             var painting = FindPaintingById(model.Id);
@@ -149,7 +171,6 @@ namespace Karpinski_XY_Server.Features.Paintings.Services
             var mapped = _mapper.Map<List<Painting>, IEnumerable<PaintingDto>>(paintings);
             return Result<IEnumerable<PaintingDto>>.Success(mapped);
         }
-
 
 
         private Painting FindPaintingById(Guid id)

@@ -1,12 +1,15 @@
-﻿using Karpinski_XY.Data;
+﻿using FluentValidation;
+using Karpinski_XY.Data;
 using Karpinski_XY.Infrastructure.Filters;
 using Karpinski_XY.Models;
 using Karpinski_XY_Server.Features.Inquiry.Models;
 using Karpinski_XY_Server.Features.Paintings.Models;
+using Karpinski_XY_Server.Validators;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NetCore.AutoRegisterDi;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace Karpinski_XY.Infrastructure.Extensions
@@ -75,6 +78,18 @@ namespace Karpinski_XY.Infrastructure.Extensions
              => services.RegisterAssemblyPublicNonGenericClasses()
                     .Where(c => c.Name.EndsWith("Service"))
                     .AsPublicImplementedInterfaces(ServiceLifetime.Scoped);
+        public static IServiceCollection AddApplicationValidators(this IServiceCollection services)
+        {
+            services.Scan(scan => scan
+            .FromAssemblies(AppDomain.CurrentDomain.GetAssemblies())
+            .AddClasses(classes => classes.AssignableTo(typeof(IValidator<>)).Where(x => x.Name.EndsWith("Validator")))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
+
+            return services;
+
+        }
+
 
         public static void AddApiControllers(this IServiceCollection services)
         => services.AddControllers(options => options.Filters.Add<ModelOrNotFoundActionFilter>());
@@ -86,8 +101,8 @@ namespace Karpinski_XY.Infrastructure.Extensions
         {
             string suffix = "DTO";
             string returnedValue = currentClass.Name;
-            if(returnedValue.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)) 
-            returnedValue = returnedValue.Replace(suffix, string.Empty, StringComparison.OrdinalIgnoreCase);
+            if (returnedValue.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                returnedValue = returnedValue.Replace(suffix, string.Empty, StringComparison.OrdinalIgnoreCase);
             return returnedValue;
         }
     }
