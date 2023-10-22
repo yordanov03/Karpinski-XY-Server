@@ -2,8 +2,7 @@
 using Karpinski_XY.Data;
 using Karpinski_XY.Infrastructure.Filters;
 using Karpinski_XY.Models;
-using Karpinski_XY_Server.Features.Inquiry.Models;
-using Karpinski_XY_Server.Features.Paintings.Models;
+using Karpinski_XY_Server.Data.Models.Configuration;
 using Karpinski_XY_Server.Validators;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;

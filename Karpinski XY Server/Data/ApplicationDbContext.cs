@@ -1,8 +1,8 @@
-﻿using Karpinski_XY.Infrastructure.Services;
-using Karpinski_XY.Models;
+﻿using Karpinski_XY.Models;
 using Karpinski_XY_Server.Data.Models;
 using Karpinski_XY_Server.Data.Models.Base;
 using Karpinski_XY_Server.Models;
+using Karpinski_XY_Server.Services.Contracts;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 

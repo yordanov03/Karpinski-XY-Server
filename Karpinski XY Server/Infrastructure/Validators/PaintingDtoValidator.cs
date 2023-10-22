@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using Karpinski_XY_Server.Features.Paintings.Models;
+using Karpinski_XY_Server.Dtos;
 
 public class PaintingDtoValidator : AbstractValidator<PaintingDto>
 {

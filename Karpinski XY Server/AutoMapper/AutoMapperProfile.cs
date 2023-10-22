@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Karpinski_XY_Server.Data.Models;
-using Karpinski_XY_Server.Features.Paintings.Models;
+using Karpinski_XY_Server.Dtos;
 using Karpinski_XY_Server.Models;
 
 namespace Karpinski_XY_Server.AutoMapper

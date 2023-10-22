@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using Karpinski_XY_Server.Features.Inquiry.Models;
+using Karpinski_XY_Server.Dtos;
 
 namespace Karpinski_XY_Server.Infrastructure.Validators
 {
@@ -19,7 +19,7 @@ namespace Karpinski_XY_Server.Infrastructure.Validators
 
             RuleFor(contact => contact.Content)
                 .NotEmpty()
-                .WithMessage("Content is required."));
+                .WithMessage("Content is required.");
         }
     }
 }
