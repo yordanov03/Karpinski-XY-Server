@@ -4,11 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Karpinski_XY_Server.Controllers
 {
-    public class InquiryController : ApiController
+    public class ContactController : ApiController
     {
-        private readonly IInquiryEmailSenderService _inquiryEmailSender;
+        private readonly IContactEmailSenderService _inquiryEmailSender;
 
-        public InquiryController(IInquiryEmailSenderService inquiryEmailSender)
+        public ContactController(IContactEmailSenderService inquiryEmailSender)
         {
             _inquiryEmailSender = inquiryEmailSender;
         }
@@ -16,7 +16,7 @@ namespace Karpinski_XY_Server.Controllers
         [HttpPost]
         [Route("", Name = "registerInquiry")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public async Task<IActionResult> RegisterInquiryEmail([FromBody] InquiryDto inquiry)
+        public async Task<IActionResult> RegisterInquiryEmail([FromBody] ContactDto inquiry)
         {
             var result = await _inquiryEmailSender.SendEmailAsync(inquiry);
 

@@ -4,7 +4,7 @@ namespace Karpinski_XY_Server.Helpers
 {
     public static class EmailTemplates
     {
-        public static string RequestorConfirmationTemplate(InquiryDto inquiry)
+        public static string RequestorConfirmationTemplate(ContactDto inquiry)
         {
             string template = File.ReadAllText("..\\Karpinski XY Server\\Features\\Inquiry\\EmailTemplates\\index.html");
             var replacedName = template.Replace("{{name}}", inquiry.Name);

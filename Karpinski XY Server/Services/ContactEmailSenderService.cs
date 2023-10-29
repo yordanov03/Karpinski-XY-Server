@@ -11,23 +11,23 @@ using Karpinski_XY_Server.Data.Models.Base;
 
 namespace Karpinski_XY_Server.Services
 {
-    public class InquiryEmailSenderService : IInquiryEmailSenderService
+    public class ContactEmailSenderService : Contracts.IContactEmailSenderService
     {
         private readonly SmtpSettings _smtpSettings;
-        private readonly IValidator<InquiryDto> _inquiryValidator;
-        private readonly ILogger<InquiryEmailSenderService> _logger;
+        private readonly IValidator<ContactDto> _inquiryValidator;
+        private readonly ILogger<ContactEmailSenderService> _logger;
         private static readonly Random _random = new Random();
 
-        public InquiryEmailSenderService(IOptions<SmtpSettings> smtpSettings,
-            IValidator<InquiryDto> inquiryValidator,
-            ILogger<InquiryEmailSenderService> logger)
+        public ContactEmailSenderService(IOptions<SmtpSettings> smtpSettings,
+            IValidator<ContactDto> inquiryValidator,
+            ILogger<ContactEmailSenderService> logger)
         {
             _smtpSettings = smtpSettings.Value;
             _inquiryValidator = inquiryValidator;
             _logger = logger;
         }
 
-        public async Task<Result<string>> SendEmailAsync(InquiryDto inquiry)
+        public async Task<Result<string>> SendEmailAsync(ContactDto inquiry)
         {
             var validationResult = _inquiryValidator.Validate(inquiry);
             if (!validationResult.IsValid)

@@ -1,6 +1,6 @@
 ﻿namespace Karpinski_XY_Server.Dtos
 {
-    public class InquiryDto
+    public class ContactDto
     {
         public string Name { get; set; }
         public string Email { get; set; }

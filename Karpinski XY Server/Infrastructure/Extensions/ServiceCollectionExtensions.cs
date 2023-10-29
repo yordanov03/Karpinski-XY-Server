@@ -1,14 +1,11 @@
 ﻿using FluentValidation;
 using Karpinski_XY.Data;
-using Karpinski_XY.Infrastructure.Filters;
 using Karpinski_XY.Models;
 using Karpinski_XY_Server.Data.Models.Configuration;
-using Karpinski_XY_Server.Validators;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NetCore.AutoRegisterDi;
-using System.ComponentModel.DataAnnotations;
 using System.Text;
 
 namespace Karpinski_XY.Infrastructure.Extensions
@@ -90,8 +87,8 @@ namespace Karpinski_XY.Infrastructure.Extensions
         }
 
 
-        public static void AddApiControllers(this IServiceCollection services)
-        => services.AddControllers(options => options.Filters.Add<ModelOrNotFoundActionFilter>());
+        //public static void AddApiControllers(this IServiceCollection services)
+        //=> services.AddControllers(options => options.Filters.Add<ModelOrNotFoundActionFilter>());
 
         public static IServiceCollection AddAutoMapperConfiguration(this IServiceCollection services)
             => services.AddAutoMapper(typeof(Program));
