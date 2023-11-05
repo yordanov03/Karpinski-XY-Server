@@ -4,7 +4,6 @@ using Karpinski_XY.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -12,10 +11,9 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Karpinski_XY_Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20231020090549_PaintingPictures")]
-    partial class PaintingPictures
+    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -24,7 +22,7 @@ namespace Karpinski_XY_Server.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("Karpinski_XY_Server.Data.Models.PaintingPicture", b =>
+            modelBuilder.Entity("Karpinski_XY_Server.Data.Models.Image", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -43,7 +41,7 @@ namespace Karpinski_XY_Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsMainPicture")
+                    b.Property<bool>("IsMainImage")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("ModifiedOn")
@@ -56,7 +54,7 @@ namespace Karpinski_XY_Server.Migrations
 
                     b.HasIndex("PaintingId");
 
-                    b.ToTable("PaintingPictures");
+                    b.ToTable("Images");
                 });
 
             modelBuilder.Entity("Karpinski_XY_Server.Models.Painting", b =>
@@ -85,6 +83,9 @@ namespace Karpinski_XY_Server.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsOnFocus")
+                        .HasColumnType("bit");
+
                     b.Property<DateTime?>("ModifiedOn")
                         .HasColumnType("datetime2");
 
@@ -92,9 +93,6 @@ namespace Karpinski_XY_Server.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("OnFocus")
-                        .HasColumnType("bit");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
@@ -317,10 +315,10 @@ namespace Karpinski_XY_Server.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Karpinski_XY_Server.Data.Models.PaintingPicture", b =>
+            modelBuilder.Entity("Karpinski_XY_Server.Data.Models.Image", b =>
                 {
                     b.HasOne("Karpinski_XY_Server.Models.Painting", "Painting")
-                        .WithMany("PaintingPictures")
+                        .WithMany("Images")
                         .HasForeignKey("PaintingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -381,7 +379,7 @@ namespace Karpinski_XY_Server.Migrations
 
             modelBuilder.Entity("Karpinski_XY_Server.Models.Painting", b =>
                 {
-                    b.Navigation("PaintingPictures");
+                    b.Navigation("Images");
                 });
 #pragma warning restore 612, 618
         }

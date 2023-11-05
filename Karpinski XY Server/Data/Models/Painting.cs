@@ -29,9 +29,9 @@ namespace Karpinski_XY_Server.Models
 
         public int Year { get; set; }
 
-        public bool OnFocus { get; set; }
+        public bool IsOnFocus { get; set; }
 
-        public List<PaintingPicture> PaintingPictures { get; set; } = new List<PaintingPicture>();
+        public List<Image> Images { get; set; } = new List<Image>();
 
 
     }

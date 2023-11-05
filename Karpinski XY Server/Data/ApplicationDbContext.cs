@@ -20,16 +20,17 @@ namespace Karpinski_XY.Data
         }
 
         public DbSet<Painting> Paintings { get; set; }
-        public DbSet<PaintingPicture> PaintingPictures { get; set; }
+        public DbSet<Image> Images { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
             builder.Entity<Painting>()
-            .HasMany(p => p.PaintingPictures)
+            .HasMany(p => p.Images)
             .WithOne(pp => pp.Painting)
-            .HasForeignKey(pp => pp.PaintingId);
+            .HasForeignKey(pp => pp.PaintingId)
+            .OnDelete(DeleteBehavior.Cascade);
         }
 
         public override int SaveChanges(bool acceptAllChangesOnSuccess)

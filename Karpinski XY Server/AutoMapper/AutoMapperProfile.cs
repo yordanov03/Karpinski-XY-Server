@@ -15,27 +15,27 @@ namespace Karpinski_XY_Server.AutoMapper
             //CreateMap<PaintingPicture, PaintingPictureDto>();
             //CreateMap<PaintingPictureDto, PaintingPicture>();
             CreateMap<Painting, PaintingDto>()
-               .ForMember(dest => dest.PaintingPictures, opt => opt.MapFrom(src => src.PaintingPictures))
+               .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images))
                .AfterMap((src, dest) => {
-                   foreach (var paintingPictureDto in dest.PaintingPictures)
+                   foreach (var imageDto in dest.Images)
                    {
-                       paintingPictureDto.PaintingId = src.Id;
+                       imageDto.PaintingId = src.Id;
                    }
                });
 
             CreateMap<PaintingDto, Painting>()
-                .ForMember(dest => dest.PaintingPictures, opt => opt.MapFrom(src => src.PaintingPictures))
+                .ForMember(dest => dest.Images, opt => opt.MapFrom(src => src.Images))
                 .AfterMap((src, dest) => {
-                    foreach (var paintingPicture in dest.PaintingPictures)
+                    foreach (var image in dest.Images)
                     {
-                        paintingPicture.PaintingId = src.Id;
+                        image.PaintingId = src.Id;
                     }
                 });
 
-            CreateMap<PaintingPicture, PaintingPictureDto>()
+            CreateMap<Image, ImageDto>()
                 .ForMember(dest => dest.PaintingId, opt => opt.MapFrom(src => src.PaintingId));
 
-            CreateMap<PaintingPictureDto, PaintingPicture>()
+            CreateMap<ImageDto, Image>()
                 .ForMember(dest => dest.PaintingId, opt => opt.MapFrom(src => src.PaintingId));
 
         }

@@ -10,6 +10,7 @@ namespace Karpinski_XY_Server.Services.Contracts
         public Task<Result<IEnumerable<PaintingDto>>> GetPaintingsOnFocus();
         public Task<Result<IEnumerable<PaintingDto>>> GetPortfolioPaintings();
         public Task<Result<PaintingDto>> GetPaintingById(Guid id);
+        public Task<Result<PaintingDto>> GetPaintingToEdit(Guid id);
         public Task<Result<Guid>> Create(PaintingDto model);
         public Task<Result<PaintingDto>> Update(PaintingDto model);
         public Task<Result<bool>> Delete(Guid id);

@@ -37,6 +37,13 @@ Log.Logger = new LoggerConfiguration()
 
 var app = builder.Build();
 
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "Resources", "Images")),
+    RequestPath = "/Resources/Images"
+});
+
 
 if (app.Environment.IsDevelopment())
 {

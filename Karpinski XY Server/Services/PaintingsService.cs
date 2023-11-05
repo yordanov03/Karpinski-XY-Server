@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using Karpinski_XY.Data;
+using Karpinski_XY_Server.Data.Models;
 using Karpinski_XY_Server.Data.Models.Base;
 using Karpinski_XY_Server.Dtos;
 using Karpinski_XY_Server.Models;
@@ -44,14 +45,14 @@ namespace Karpinski_XY_Server.Services
             _logger.LogInformation("Creating a new painting");
 
             model.Id = Guid.NewGuid();
-            var updateResult = await _fileService.UpdateImagePathsAsync(model.PaintingPictures);
+            var updateResult = await _fileService.UpdateImagePathsAsync(model.Images);
 
             if (!updateResult.Succeeded)
             {
                 return Result<Guid>.Fail("Failed to update image paths.");
             }
 
-            model.PaintingPictures = updateResult.Value;
+            model.Images = updateResult.Value;
 
             var painting = _mapper.Map<Painting>(model);
             _context.Add(painting);
@@ -68,6 +69,7 @@ namespace Karpinski_XY_Server.Services
 
             var paintings = await _context
                 .Paintings
+                .Include(p => p.Images.Where(i=>i.IsMainImage))
                 .Where(p => !p.IsDeleted)
                 .ToListAsync();
 
@@ -80,6 +82,7 @@ namespace Karpinski_XY_Server.Services
 
             var paintings = await _context
                 .Paintings
+                .Include(p => p.Images.Where(i => i.IsMainImage))
                 .Where(p => p.IsAvailableToSell && !p.IsDeleted)
                 .ToListAsync();
 
@@ -105,6 +108,7 @@ namespace Karpinski_XY_Server.Services
 
             var paintings = await _context
                 .Paintings
+                .Include(p => p.Images)
                 .Where(p => !p.IsAvailableToSell)
                 .ToListAsync();
 
@@ -129,6 +133,12 @@ namespace Karpinski_XY_Server.Services
             {
                 _logger.LogWarning($"Painting with ID {model.Id} not found.");
                 return Result<PaintingDto>.Fail("Painting not found.");
+            }
+
+            var imagesWithoutPath = model.Images.Where(i => string.IsNullOrEmpty(i.ImageUrl)).ToList();
+            if (imagesWithoutPath.Any())
+            {
+                await _fileService.UpdateImagePathsAsync(imagesWithoutPath);
             }
 
             _mapper.Map(model, painting);
@@ -165,12 +175,38 @@ namespace Karpinski_XY_Server.Services
 
             var paintings = await _context
                 .Paintings
-                .Where(p => p.IsAvailableToSell && p.IsDeleted == false && p.OnFocus == true)
+                .Include(p => p.Images.Where(i => i.IsMainImage))
+                .Where(p => p.IsAvailableToSell && p.IsDeleted == false && p.IsOnFocus == true)
                 .OrderByDescending(p => p.CreatedOn)
                 .ToListAsync();
 
             var mapped = _mapper.Map<List<Painting>, IEnumerable<PaintingDto>>(paintings);
             return Result<IEnumerable<PaintingDto>>.Success(mapped);
+        }
+
+        public async Task<Result<PaintingDto>> GetPaintingToEdit(Guid id)
+        {
+            _logger.LogInformation($"Fetching painting with id {id} to edit");
+
+            var painting = FindPaintingById(id);
+            if (painting == null)
+            {
+                return Result<PaintingDto>.Fail($"Painting with ID {id} not found.");
+            }
+
+            painting.Images = this._context.Images.Where(i => i.PaintingId == id).ToList();
+            var paintingDto = _mapper.Map<PaintingDto>(painting);
+
+            // Convert image paths to Base64 strings
+            var imageConversionResult = await _fileService.ConvertImagePathsToBase64Async(paintingDto.Images);
+            if (!imageConversionResult.Succeeded)
+            {
+                return Result<PaintingDto>.Fail(imageConversionResult.Errors);
+            }
+
+            paintingDto.Images = imageConversionResult.Value;
+
+            return Result<PaintingDto>.Success(paintingDto);
         }
 
 
@@ -179,7 +215,5 @@ namespace Karpinski_XY_Server.Services
             .Paintings
             .Where(p => p.Id == id)
             .FirstOrDefault();
-
-
     }
 }

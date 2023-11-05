@@ -1,80 +1,170 @@
-﻿using FluentValidation;
-using Karpinski_XY_Server.Data.Models.Base;
+﻿using Karpinski_XY_Server.Data.Models.Base;
 using Karpinski_XY_Server.Data.Models.Configuration;
 using Karpinski_XY_Server.Dtos;
 using Karpinski_XY_Server.Services.Contracts;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
 
 namespace Karpinski_XY_Server.Services
 {
     public class FileService : IFileService
     {
         private readonly ILogger<FileService> _logger;
-        private readonly PaintingFiles _paintingFiles;
-        private readonly IValidator<PaintingPictureDto> _paintingPictureDtoValidator;
+        private readonly ImageFiles _imageFiles;
+        private readonly IWebHostEnvironment _env;
+
 
         public FileService(ILogger<FileService> logger,
-            IOptions<PaintingFiles> paintingFiles,
-            IValidator<PaintingPictureDto> paintingPictureDtoValidator)
+            IOptions<ImageFiles> imageFiles,
+            IWebHostEnvironment env)
         {
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            _paintingFiles = paintingFiles.Value;
-            _paintingPictureDtoValidator = paintingPictureDtoValidator;
+            _imageFiles = imageFiles.Value;
+            _env = env;
         }
 
-        public Task<Result<List<PaintingPictureDto>>> UpdateImagePathsAsync(List<PaintingPictureDto> paintingPictures)
+        /// <summary>
+        /// String to image path
+        /// </summary>
+        /// <param name="imageDtos"></param>
+        /// <returns></returns>
+        public async Task<Result<List<ImageDto>>> UpdateImagePathsAsync(List<ImageDto> imageDtos)
         {
-            _logger.LogInformation("Starting to update image paths for {Count} painting(s).", paintingPictures.Count);
+            _logger.LogInformation("Starting to update image paths for {Count} image(s).", imageDtos.Count);
 
             var errors = new List<string>();
 
-            foreach (var paintingPicture in paintingPictures)
+            foreach (var imageDto in imageDtos)
             {
-                var error = UpdateImagePath(paintingPicture);
+                var error = await UpdateImagePathAsync(imageDto);
                 if (error != null)
                 {
                     errors.Add(error);
                 }
             }
 
-            _logger.LogInformation("Completed updating image paths for {Count} painting(s).", paintingPictures.Count);
+            _logger.LogInformation("Completed updating image paths for {Count} image(s).", imageDtos.Count);
 
             if (errors.Count > 0)
             {
                 var aggregatedErrors = string.Join(Environment.NewLine, errors);
-                return Task.FromResult(Result<List<PaintingPictureDto>>.Fail(new List<string> { $"Validation failed:{Environment.NewLine}{aggregatedErrors}" }));
+                return Result<List<ImageDto>>.Fail(new List<string> { $"Validation failed:{Environment.NewLine}{aggregatedErrors}" });
             }
 
-            return Task.FromResult(Result<List<PaintingPictureDto>>.Success(paintingPictures));
+            return Result<List<ImageDto>>.Success(imageDtos);
         }
 
-        private string UpdateImagePath(PaintingPictureDto paintingPicture)
+        private async Task<string> UpdateImagePathAsync(ImageDto imageDto)
         {
-            var validationResult = _paintingPictureDtoValidator.Validate(paintingPicture);
-            if (!validationResult.IsValid)
-            {
-                var aggregatedErrors = string.Join(Environment.NewLine, validationResult.Errors.Select(e => e.ErrorMessage));
-                return $"Validation failed:{Environment.NewLine}{aggregatedErrors}";
-            }
-
             try
             {
-                var fileName = Path.GetFileName(paintingPicture.ImageUrl);
-                var newPath = Path.Combine(_paintingFiles.Path, fileName);
-                File.Copy(paintingPicture.ImageUrl, newPath);
+                //var fileName = Guid.NewGuid().ToString() + ".jpg"; // You may customize the file name generation logic
+                //var currentDirectory = Directory.GetCurrentDirectory();
+                //var newPath = Path.Combine(currentDirectory, _imageFiles.Path, fileName);
 
-                paintingPicture.ImageUrl = newPath;
-                _logger.LogInformation("Successfully updated image path for painting: {FileName}", fileName);
+                var fileName = Guid.NewGuid().ToString() + ".jpg";
+                var currentDirectory = Directory.GetCurrentDirectory();
+                var newPath = Path.Combine(currentDirectory, _imageFiles.Path.TrimStart('\\', '/'), fileName);
+
+
+                var imageBytes = Convert.FromBase64String(imageDto.File);
+                await File.WriteAllBytesAsync(newPath, imageBytes);
+
+                imageDto.File = null;  // Clear the Base64 string as it's no longer needed
+                imageDto.ImageUrl = $"{GetBaseUrlFromLaunchSettings()}{_imageFiles.Path}\\{fileName}";  // Set the URL to the path where the file is stored
+                _logger.LogInformation("Successfully updated image path for image: {FileName}", fileName);
 
                 return null;
             }
             catch (Exception ex)
             {
-                var errorMessage = $"Failed to update image path for {paintingPicture.ImageUrl}: {ex.Message}";
-                _logger.LogError(ex, "Error while updating image path for painting: {FileName}", paintingPicture.ImageUrl);
+                var errorMessage = $"Failed to update image path for {imageDto.ImageUrl}: {ex.Message}";
+                _logger.LogError(ex, "Error while updating image path for image: {FileName}", imageDto.ImageUrl);
                 return errorMessage;
             }
         }
 
+        // Image to string
+        public async Task<Result<List<ImageDto>>> ConvertImagePathsToBase64Async(List<ImageDto> imageDtos)
+        {
+            _logger.LogInformation("Starting to convert image paths to Base64 for {Count} image(s).", imageDtos.Count);
+
+            var errors = new List<string>();
+
+            foreach (var imageDto in imageDtos)
+            {
+                var error = await ConvertImagePathToBase64Async(imageDto);
+                if (error != null)
+                {
+                    errors.Add(error);
+                }
+            }
+
+            _logger.LogInformation("Completed converting image paths to Base64 for {Count} image(s).", imageDtos.Count);
+
+            if (errors.Count > 0)
+            {
+                var aggregatedErrors = string.Join(Environment.NewLine, errors);
+                return Result<List<ImageDto>>.Fail(new List<string> { $"Validation failed:{Environment.NewLine}{aggregatedErrors}" });
+            }
+
+            return Result<List<ImageDto>>.Success(imageDtos);
+        }
+
+        private async Task<string> ConvertImagePathToBase64Async(ImageDto imageDto)
+        {
+            //try
+            //{
+            //    var filePath = Path.Combine(_imageFiles.Path, imageDto.ImageUrl);
+            //    var imageBytes = await File.ReadAllBytesAsync(filePath);
+            //    imageDto.File = Convert.ToBase64String(imageBytes); // Set the Base64 string
+
+            //    _logger.LogInformation("Successfully converted image path to Base64 for image: {FileName}", imageDto.ImageUrl);
+
+            //    return null;
+            //}
+            //catch (Exception ex)
+            //{
+            //    var errorMessage = $"Failed to convert image path to Base64 for {imageDto.ImageUrl}: {ex.Message}";
+            //    _logger.LogError(ex, "Error while converting image path to Base64 for image: {FileName}", imageDto.ImageUrl);
+            //    return errorMessage;
+            //}
+            try
+            {
+                var baseUrl = GetBaseUrlFromLaunchSettings();
+                var relativePath = imageDto.ImageUrl.Replace(baseUrl, string.Empty);
+
+                var filePath = Path.Combine(_imageFiles.Path, relativePath);
+                var imageBytes = await File.ReadAllBytesAsync(filePath);
+
+                imageDto.File = Convert.ToBase64String(imageBytes); // Set the Base64 string
+
+                _logger.LogInformation("Successfully converted image path to Base64 for image: {FileName}", imageDto.ImageUrl);
+
+                return null;
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = $"Failed to convert image path to Base64 for {imageDto.ImageUrl}: {ex.Message}";
+                _logger.LogError(ex, "Error while converting image path to Base64 for image: {FileName}", imageDto.ImageUrl);
+                return errorMessage;
+            }
+        }
+
+        private string GetBaseUrlFromLaunchSettings()
+        {
+            var launchSettingsFilePath = Path.Combine(_env.ContentRootPath, "Properties", "launchSettings.json");
+
+            if (!System.IO.File.Exists(launchSettingsFilePath))
+            {
+                return "launchSettings.json not found";
+            }
+
+            var launchSettings = JObject.Parse(System.IO.File.ReadAllText(launchSettingsFilePath));
+            var applicationUrls = launchSettings["profiles"]["Karpinski_XY_Server"]["applicationUrl"].ToString();
+            var firstUrl = applicationUrls.Split(';')[0];
+
+            return firstUrl;
+        }
     }
 }

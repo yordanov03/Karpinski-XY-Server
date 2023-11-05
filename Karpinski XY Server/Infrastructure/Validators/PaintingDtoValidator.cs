@@ -18,7 +18,7 @@ public class PaintingDtoValidator : AbstractValidator<PaintingDto>
         RuleFor(p => p.Description)
             .NotEmpty().WithMessage("Description is required.");
 
-        RuleFor(p => p.PaintingPictures)
+        RuleFor(p => p.Images)
             .Must(list => list != null && list.Any()).WithMessage("At least one painting picture must be provided.");
 
     }

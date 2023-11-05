@@ -21,7 +21,7 @@ namespace Karpinski_XY_Server.Controllers
         [Route("", Name = "create")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Create(PaintingDto model)
+        public async Task<IActionResult> Create([FromBody]PaintingDto model)
         {
             var result = await _paintingsService.Create(model);
 
@@ -36,7 +36,7 @@ namespace Karpinski_XY_Server.Controllers
         [HttpGet]
         [AllowAnonymous]
         [Route("available", Name = "available")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<PaintingDto>), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetAvailablePaintings()
         {
             var result = await _paintingsService.GetAvailablePaintings();
@@ -50,10 +50,26 @@ namespace Karpinski_XY_Server.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        [Route("{id}", Name = "getPainting")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [Route("toEdit/{id}", Name = "getPaintingToEdit")]
+        [ProducesResponseType (typeof(PaintingDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Details(Guid id)
+        public async Task<IActionResult> GetPaintingToEdit(Guid id)
+        {
+            var result = await _paintingsService.GetPaintingToEdit(id);
+            if (result.Succeeded)
+            {
+                return Ok(result.Value);
+            }
+
+            return BadRequest(result.Errors);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("{id}", Name = "getPainting")]
+        [ProducesResponseType(typeof(PaintingDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetPainting(Guid id)
         {
             var result = await _paintingsService.GetPaintingById(id);
             if (result.Succeeded)
@@ -65,7 +81,8 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpPut]
-        [Authorize]
+        //[Authorize]
+        [AllowAnonymous]
         [Route("", Name = "update")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -99,7 +116,7 @@ namespace Karpinski_XY_Server.Controllers
         [HttpGet]
         [AllowAnonymous]
         [Route("", Name = "onFocus")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IEnumerable<PaintingDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetPaintingsOnFocus()
         {

@@ -5,6 +5,7 @@ namespace Karpinski_XY_Server.Services.Contracts
 {
     public interface IFileService
     {
-        Task<Result<List<PaintingPictureDto>>> UpdateImagePathsAsync(List<PaintingPictureDto> paintingPictures);
+        Task<Result<List<ImageDto>>> UpdateImagePathsAsync(List<ImageDto> images);
+        Task<Result<List<ImageDto>>> ConvertImagePathsToBase64Async(List<ImageDto> imageDtos);
     }
 }

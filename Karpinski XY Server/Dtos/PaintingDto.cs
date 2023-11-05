@@ -24,7 +24,7 @@ namespace Karpinski_XY_Server.Dtos
 
         public int Year { get; set; }
 
-        public bool OnFocus { get; set; }
-        public List<PaintingPictureDto> PaintingPictures { get; set; } = new List<PaintingPictureDto>();
+        public bool IsOnFocus { get; set; }
+        public List<ImageDto> Images{ get; set; } = new List<ImageDto>();
     }
 }
