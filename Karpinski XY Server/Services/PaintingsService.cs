@@ -135,6 +135,8 @@ namespace Karpinski_XY_Server.Services
                 return Result<PaintingDto>.Fail("Painting not found.");
             }
 
+            this._fileService.MarkDeletedImagesAsDeleted(model.Images, painting.Images);
+
             var imagesWithoutPath = model.Images.Where(i => string.IsNullOrEmpty(i.ImageUrl)).ToList();
             if (imagesWithoutPath.Any())
             {
@@ -162,6 +164,7 @@ namespace Karpinski_XY_Server.Services
             }
 
             painting.IsDeleted = true;
+            painting.Images.ForEach(image => image.IsDeleted = true);
             _context.Update(painting);
             await _context.SaveChangesAsync();
 
@@ -194,7 +197,7 @@ namespace Karpinski_XY_Server.Services
                 return Result<PaintingDto>.Fail($"Painting with ID {id} not found.");
             }
 
-            painting.Images = this._context.Images.Where(i => i.PaintingId == id).ToList();
+            //painting.Images = this._context.Images.Where(i => i.PaintingId == id).ToList();
             var paintingDto = _mapper.Map<PaintingDto>(painting);
 
             // Convert image paths to Base64 strings
@@ -213,6 +216,9 @@ namespace Karpinski_XY_Server.Services
         private Painting FindPaintingById(Guid id)
         => _context
             .Paintings
+            .Include(p=>p.Images
+                .Where(i=>!i.IsDeleted)
+                .OrderBy(i=>!i.IsMainImage))
             .Where(p => p.Id == id)
             .FirstOrDefault();
     }

@@ -1,4 +1,5 @@
-﻿using Karpinski_XY_Server.Data.Models.Base;
+﻿using Karpinski_XY_Server.Data.Models;
+using Karpinski_XY_Server.Data.Models.Base;
 using Karpinski_XY_Server.Data.Models.Configuration;
 using Karpinski_XY_Server.Dtos;
 using Karpinski_XY_Server.Services.Contracts;
@@ -58,13 +59,9 @@ namespace Karpinski_XY_Server.Services
         {
             try
             {
-                //var fileName = Guid.NewGuid().ToString() + ".jpg"; // You may customize the file name generation logic
-                //var currentDirectory = Directory.GetCurrentDirectory();
-                //var newPath = Path.Combine(currentDirectory, _imageFiles.Path, fileName);
-
-                var fileName = Guid.NewGuid().ToString() + ".jpg";
-                var currentDirectory = Directory.GetCurrentDirectory();
-                var newPath = Path.Combine(currentDirectory, _imageFiles.Path.TrimStart('\\', '/'), fileName);
+                imageDto.Id = Guid.NewGuid();
+                var fileName = imageDto.Id + ".jpg";
+                var newPath = Path.Combine(_imageFiles.Path.TrimStart('\\', '/'), fileName);
 
 
                 var imageBytes = Convert.FromBase64String(imageDto.File);
@@ -135,7 +132,8 @@ namespace Karpinski_XY_Server.Services
                 var relativePath = imageDto.ImageUrl.Replace(baseUrl, string.Empty);
 
                 var filePath = Path.Combine(_imageFiles.Path, relativePath);
-                var imageBytes = await File.ReadAllBytesAsync(filePath);
+                var fullPath = $"{Directory.GetCurrentDirectory()}{filePath}";
+                var imageBytes = await File.ReadAllBytesAsync(fullPath);
 
                 imageDto.File = Convert.ToBase64String(imageBytes); // Set the Base64 string
 
@@ -155,16 +153,31 @@ namespace Karpinski_XY_Server.Services
         {
             var launchSettingsFilePath = Path.Combine(_env.ContentRootPath, "Properties", "launchSettings.json");
 
-            if (!System.IO.File.Exists(launchSettingsFilePath))
+            if (!File.Exists(launchSettingsFilePath))
             {
                 return "launchSettings.json not found";
             }
 
-            var launchSettings = JObject.Parse(System.IO.File.ReadAllText(launchSettingsFilePath));
+            var launchSettings = JObject.Parse(File.ReadAllText(launchSettingsFilePath));
             var applicationUrls = launchSettings["profiles"]["Karpinski_XY_Server"]["applicationUrl"].ToString();
             var firstUrl = applicationUrls.Split(';')[0];
 
             return firstUrl;
+        }
+
+        public void MarkDeletedImagesAsDeleted(List<ImageDto> imageDtos, List<Image> images)
+        {
+            var imageDtoIds = new HashSet<Guid>(imageDtos.Select(dto => dto.Id));
+
+            // Iterate over the images and set IsDeleted to true if the Id is not in the HashSet.
+            images.ForEach(image => {
+                if (!imageDtoIds.Contains(image.Id))
+                {
+                    image.IsDeleted = true;
+                }
+            });
+
+            // Since the method is void, there is no return statement needed.
         }
     }
 }

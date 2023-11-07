@@ -15,8 +15,7 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpPost]
-        //[Authorize]
-        [AllowAnonymous]
+        [Authorize]
         [DisableRequestSizeLimit]
         [Route("", Name = "create")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -49,7 +48,7 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
+        [Authorize]
         [Route("toEdit/{id}", Name = "getPaintingToEdit")]
         [ProducesResponseType (typeof(PaintingDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -81,8 +80,7 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpPut]
-        //[Authorize]
-        [AllowAnonymous]
+        [Authorize]
         [Route("", Name = "update")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -100,7 +98,7 @@ namespace Karpinski_XY_Server.Controllers
         [HttpDelete]
         [Authorize]
         [Route("{id}", Name = "delete")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Delete(Guid id)
         {
