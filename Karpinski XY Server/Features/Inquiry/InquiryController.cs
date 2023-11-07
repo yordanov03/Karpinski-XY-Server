@@ -16,7 +16,7 @@ namespace Karpinski_XY_Server.Features.inquiry
         [HttpPost]
         public async Task<IActionResult> Registerinquiry(InquiryDto inquiry)
         {
-            var result = await this._inquiryEmailSender.SendEmailAsync(inquiry);
+            await this._inquiryEmailSender.SendEmailAsync(inquiry);
             return Ok();
         }
     }
