@@ -4,8 +4,11 @@ using System.Net;
 using MimeKit;
 using MailKit.Net.Smtp;
 using Karpinski_XY_Server.Features.Inquiry.Models;
+using Karpinski_XY_Server.Services.Contracts;
+using Karpinski_XY_Server.Features.inquiry;
+using Karpinski_XY_Server.Dtos;
 
-namespace Karpinski_XY_Server.Features.inquiry
+namespace Karpinski_XY_Server.Services
 {
     public class InquiryEmailSenderService : IinquiryEmailSenderService
     {
@@ -18,7 +21,7 @@ namespace Karpinski_XY_Server.Features.inquiry
 
         public async Task<string> SendEmailAsync(InquiryDto inquiry)
         {
-            var caseNumber = new Random().Next(100,99999);
+            var caseNumber = new Random().Next(100, 99999);
 
             // send message to Requestor
             var messageToRequestor = new MimeMessage();

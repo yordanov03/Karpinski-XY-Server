@@ -1,8 +1,8 @@
-﻿using Karpinski_XY_Server.Controllers;
-using Karpinski_XY_Server.Features.Inquiry.Models;
+﻿using Karpinski_XY_Server.Dtos;
+using Karpinski_XY_Server.Services.Contracts;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Karpinski_XY_Server.Features.inquiry
+namespace Karpinski_XY_Server.Controllers
 {
     public class InquiryController : ApiController
     {
@@ -10,13 +10,13 @@ namespace Karpinski_XY_Server.Features.inquiry
 
         public InquiryController(IinquiryEmailSenderService inquiryEmailSender)
         {
-            this._inquiryEmailSender = inquiryEmailSender;
+            _inquiryEmailSender = inquiryEmailSender;
         }
 
         [HttpPost]
         public async Task<IActionResult> Registerinquiry(InquiryDto inquiry)
         {
-            await this._inquiryEmailSender.SendEmailAsync(inquiry);
+            await _inquiryEmailSender.SendEmailAsync(inquiry);
             return Ok();
         }
     }

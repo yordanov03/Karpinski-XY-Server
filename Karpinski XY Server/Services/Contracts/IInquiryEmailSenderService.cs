@@ -1,6 +1,6 @@
-﻿using Karpinski_XY_Server.Features.Inquiry.Models;
+﻿using Karpinski_XY_Server.Dtos;
 
-namespace Karpinski_XY_Server.Features.inquiry
+namespace Karpinski_XY_Server.Services.Contracts
 {
     public interface IinquiryEmailSenderService
     {
