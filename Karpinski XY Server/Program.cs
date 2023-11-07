@@ -1,6 +1,10 @@
+using Karpinski_XY;
 using Karpinski_XY.Infrastructure.Extensions;
+using Karpinski_XY_Server.Infrastructure.MIddlewares;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.OpenApi.Models;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,7 +14,14 @@ builder.Services
     .AddJWTAuthentication(builder.Services.GetApplicationSettings(builder.Configuration))
     .AddSmtpSettings(builder.Configuration)
     .AddAutoMapperConfiguration()
-    .AddSwaggerGen()
+    .AddLogging()
+    .AddSerilog()
+    .AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Karpinski", Version="v1"});
+        c.CustomSchemaIds(Karpinski_XY.Infrastructure.Extensions.ServiceCollectionExtensions.SchemaSuffixStrategy);
+    })
+    .AddApplicationValidators()
     .AddApplicationServices();
 
 builder.Services.Configure<FormOptions>(o =>
@@ -20,7 +31,18 @@ builder.Services.Configure<FormOptions>(o =>
     o.MemoryBufferThreshold = int.MaxValue;
 });
 
+Log.Logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .CreateLogger();
+
 var app = builder.Build();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "Resources", "Images")),
+    RequestPath = "/Resources/Images"
+});
 
 
 if (app.Environment.IsDevelopment())
@@ -43,12 +65,10 @@ app.UseCors(options => options
 .AllowAnyHeader());
 
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<JwtMiddleware>();
+app.UseHttpMethodOverride();
 app.UseStaticFiles();
-app.UseStaticFiles(new StaticFileOptions()
-{
-    FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"Resources")),
-    RequestPath = new PathString("/Resources")
-});
 
 app.UseAuthentication();
 app.UseAuthorization();

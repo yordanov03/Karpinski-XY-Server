@@ -1,13 +1,11 @@
-﻿using Karpinski_XY_Server.Data.Models.Base;
+﻿using Karpinski_XY_Server.Data.Models;
+using Karpinski_XY_Server.Data.Models.Base;
 using System.ComponentModel.DataAnnotations;
-using System.Reflection.Metadata.Ecma335;
 
 namespace Karpinski_XY_Server.Models
 {
     public class Painting : DeletableEntity
     {
-        public Guid Id { get; set; }
-
         [Required]
         [MaxLength(100)]
         public string Name { get; set; }
@@ -23,10 +21,7 @@ namespace Karpinski_XY_Server.Models
 
         public bool IsDeleted { get; set; } = false;
 
-        [Required]
         public bool IsAvailableToSell { get; set; }
-
-        public string ImageUrl { get; set; }
 
         public string ShortDescription { get; set; }
 
@@ -34,7 +29,9 @@ namespace Karpinski_XY_Server.Models
 
         public int Year { get; set; }
 
-        public bool OnFocus { get; set; }
+        public bool IsOnFocus { get; set; }
+
+        public List<Image> Images { get; set; } = new List<Image>();
 
 
     }

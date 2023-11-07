@@ -1,7 +1,8 @@
-﻿using Karpinski_XY.Infrastructure.Services;
-using Karpinski_XY.Models;
+﻿using Karpinski_XY.Models;
+using Karpinski_XY_Server.Data.Models;
 using Karpinski_XY_Server.Data.Models.Base;
 using Karpinski_XY_Server.Models;
+using Karpinski_XY_Server.Services.Contracts;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,10 +20,17 @@ namespace Karpinski_XY.Data
         }
 
         public DbSet<Painting> Paintings { get; set; }
+        public DbSet<Image> Images { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
+
+            builder.Entity<Painting>()
+            .HasMany(p => p.Images)
+            .WithOne(pp => pp.Painting)
+            .HasForeignKey(pp => pp.PaintingId)
+            .OnDelete(DeleteBehavior.Cascade);
         }
 
         public override int SaveChanges(bool acceptAllChangesOnSuccess)

@@ -1,7 +1,7 @@
-﻿using Karpinski_XY.Data;
-using Karpinski_XY.Infrastructure.Filters;
+﻿using FluentValidation;
+using Karpinski_XY.Data;
 using Karpinski_XY.Models;
-using Karpinski_XY_Server.Features.Inquiry.Models;
+using Karpinski_XY_Server.Data.Models.Configuration;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -67,17 +67,39 @@ namespace Karpinski_XY.Infrastructure.Extensions
         }
 
         public static IServiceCollection AddSmtpSettings(this IServiceCollection services, IConfiguration configuration)
-        => services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"));
+        => services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"))
+                    .Configure<ImageFiles>(configuration.GetSection("ImageFiles"));
 
         public static void AddApplicationServices(this IServiceCollection services)
              => services.RegisterAssemblyPublicNonGenericClasses()
                     .Where(c => c.Name.EndsWith("Service"))
                     .AsPublicImplementedInterfaces(ServiceLifetime.Scoped);
+        public static IServiceCollection AddApplicationValidators(this IServiceCollection services)
+        {
+            services.Scan(scan => scan
+            .FromAssemblies(AppDomain.CurrentDomain.GetAssemblies())
+            .AddClasses(classes => classes.AssignableTo(typeof(IValidator<>)).Where(x => x.Name.EndsWith("Validator")))
+            .AsImplementedInterfaces()
+            .WithScopedLifetime());
 
-        public static void AddApiControllers(this IServiceCollection services)
-        => services.AddControllers(options => options.Filters.Add<ModelOrNotFoundActionFilter>());
+            return services;
+
+        }
+
+
+        //public static void AddApiControllers(this IServiceCollection services)
+        //=> services.AddControllers(options => options.Filters.Add<ModelOrNotFoundActionFilter>());
 
         public static IServiceCollection AddAutoMapperConfiguration(this IServiceCollection services)
             => services.AddAutoMapper(typeof(Program));
+
+        public static string SchemaSuffixStrategy(Type currentClass)
+        {
+            string suffix = "DTO";
+            string returnedValue = currentClass.Name;
+            if (returnedValue.EndsWith(suffix, StringComparison.OrdinalIgnoreCase))
+                returnedValue = returnedValue.Replace(suffix, string.Empty, StringComparison.OrdinalIgnoreCase);
+            return returnedValue;
+        }
     }
 }
