@@ -1,4 +1,4 @@
-﻿using Karpinski_XY.Features;
+﻿using Karpinski_XY_Server.Controllers;
 using Karpinski_XY_Server.Features.Inquiry.Models;
 using Microsoft.AspNetCore.Mvc;
 
