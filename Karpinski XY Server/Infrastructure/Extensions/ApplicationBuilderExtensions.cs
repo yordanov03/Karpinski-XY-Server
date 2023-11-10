@@ -9,7 +9,7 @@ namespace Karpinski_XY.Infrastructure.Extensions
         {
             using var services = app.ApplicationServices.CreateScope();
             var dbContext = services.ServiceProvider.GetService<ApplicationDbContext>();
-            dbContext.Database.Migrate();
+            //dbContext.Database.Migrate();
         }
     }
 }

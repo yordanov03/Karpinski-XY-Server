@@ -4,6 +4,6 @@ namespace Karpinski_XY_Server.Services.Contracts
 {
     public interface IinquiryEmailSenderService
     {
-        Task<string> SendEmailAsync(InquiryDto inquiry);
+        Task<string> SendEmailAsync(ContactDto inquiry);
     }
 }

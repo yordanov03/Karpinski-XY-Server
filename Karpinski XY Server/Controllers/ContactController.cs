@@ -15,12 +15,12 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpPost]
-        [Route("", Name = "registerInquiry")]
+        [Route("", Name = "registerContact")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [AllowAnonymous]
-        public async Task<IActionResult> RegisterInquiryEmail([FromBody] ContactDto inquiry)
+        public async Task<IActionResult> RegisterInquiryEmail([FromBody] ContactDto contact)
         {
-            var result = await _contactEmailSender.SendEmailAsync(inquiry);
+            var result = await _contactEmailSender.SendEmailAsync(contact);
 
             if (result.Succeeded)
             {

@@ -1,12 +1,10 @@
 ﻿using Microsoft.Extensions.Options;
-using System.Net.Mail;
 using System.Net;
 using MimeKit;
-using MailKit.Net.Smtp;
-using Karpinski_XY_Server.Features.Inquiry.Models;
 using Karpinski_XY_Server.Services.Contracts;
-using Karpinski_XY_Server.Features.inquiry;
 using Karpinski_XY_Server.Dtos;
+using Karpinski_XY_Server.Data.Models.Configuration;
+using Karpinski_XY_Server.Helpers;
 
 namespace Karpinski_XY_Server.Services
 {
@@ -19,7 +17,7 @@ namespace Karpinski_XY_Server.Services
             _smtpSettings = smtpSettings.Value;
         }
 
-        public async Task<string> SendEmailAsync(InquiryDto inquiry)
+        public async Task<string> SendEmailAsync(ContactDto inquiry)
         {
             var caseNumber = new Random().Next(100, 99999);
 
