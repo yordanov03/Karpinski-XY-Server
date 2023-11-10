@@ -1,4 +1,4 @@
-﻿namespace Karpinski_XY
+﻿namespace Karpinski_XY_Server.Data.Models.Configuration
 {
     public class AppSettings
     {

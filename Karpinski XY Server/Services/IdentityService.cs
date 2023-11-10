@@ -1,6 +1,6 @@
-﻿using Karpinski_XY;
-using Karpinski_XY.Models;
+﻿using Karpinski_XY.Models;
 using Karpinski_XY_Server.Data.Models.Base;
+using Karpinski_XY_Server.Data.Models.Configuration;
 using Karpinski_XY_Server.Dtos.Identity;
 using Karpinski_XY_Server.Services.Contracts;
 using Microsoft.AspNetCore.Identity;
