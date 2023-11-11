@@ -1,10 +1,9 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using Karpinski_XY.Data;
-using Karpinski_XY_Server.Data.Models;
 using Karpinski_XY_Server.Data.Models.Base;
-using Karpinski_XY_Server.Dtos;
-using Karpinski_XY_Server.Models;
+using Karpinski_XY_Server.Data.Models.Painting;
+using Karpinski_XY_Server.Dtos.Painting;
 using Karpinski_XY_Server.Services.Contracts;
 using Microsoft.EntityFrameworkCore;
 
@@ -45,14 +44,14 @@ namespace Karpinski_XY_Server.Services
             _logger.LogInformation("Creating a new painting");
 
             model.Id = Guid.NewGuid();
-            var updateResult = await _fileService.UpdateImagePathsAsync(model.Images);
+            var updateResult = await _fileService.UpdateImagePathsAsync(model.PaintingImages);
 
             if (!updateResult.Succeeded)
             {
                 return Result<Guid>.Fail("Failed to update image paths.");
             }
 
-            model.Images = updateResult.Value;
+            model.PaintingImages = updateResult.Value;
 
             var painting = _mapper.Map<Painting>(model);
             _context.Add(painting);
@@ -72,17 +71,16 @@ namespace Karpinski_XY_Server.Services
                 return Result<PaintingDto>.Fail($"Painting with ID {id} not found.");
             }
 
-            //painting.Images = this._context.Images.Where(i => i.PaintingId == id).ToList();
             var paintingDto = _mapper.Map<PaintingDto>(painting);
 
             // Convert image paths to Base64 strings
-            var imageConversionResult = await _fileService.ConvertImagePathsToBase64Async(paintingDto.Images);
+            var imageConversionResult = await _fileService.ConvertImagePathsToBase64Async(paintingDto.PaintingImages);
             if (!imageConversionResult.Succeeded)
             {
                 return Result<PaintingDto>.Fail(imageConversionResult.Errors);
             }
 
-            paintingDto.Images = imageConversionResult.Value;
+            paintingDto.PaintingImages = imageConversionResult.Value;
 
             return Result<PaintingDto>.Success(paintingDto);
         }
@@ -107,9 +105,9 @@ namespace Karpinski_XY_Server.Services
                 return Result<PaintingDto>.Fail("Painting not found.");
             }
 
-            this._fileService.MarkDeletedImagesAsDeleted(model.Images, painting.Images);
+            this._fileService.MarkDeletedImagesAsDeleted(model.PaintingImages, painting.PaintingImages);
 
-            var imagesWithoutPath = model.Images.Where(i => string.IsNullOrEmpty(i.ImageUrl)).ToList();
+            var imagesWithoutPath = model.PaintingImages.Where(i => string.IsNullOrEmpty(i.ImageUrl)).ToList();
             if (imagesWithoutPath.Any())
             {
                 await _fileService.UpdateImagePathsAsync(imagesWithoutPath);
@@ -136,7 +134,7 @@ namespace Karpinski_XY_Server.Services
             }
 
             painting.IsDeleted = true;
-            painting.Images.ForEach(image => image.IsDeleted = true);
+            painting.PaintingImages.ForEach(image => image.IsDeleted = true);
             _context.Update(painting);
             await _context.SaveChangesAsync();
 
@@ -151,7 +149,7 @@ namespace Karpinski_XY_Server.Services
 
             var paintings = await _context
                 .Paintings
-                .Include(p => p.Images.Where(i=>i.IsMainImage))
+                .Include(p => p.PaintingImages.Where(i=>i.IsMainImage))
                 .Where(p => !p.IsDeleted)
                 .ToListAsync();
 
@@ -164,7 +162,7 @@ namespace Karpinski_XY_Server.Services
 
             var paintings = await _context
                 .Paintings
-                .Include(p => p.Images.Where(i => i.IsMainImage))
+                .Include(p => p.PaintingImages.Where(i => i.IsMainImage))
                 .Where(p => p.IsAvailableToSell && !p.IsDeleted)
                 .ToListAsync();
 
@@ -190,7 +188,7 @@ namespace Karpinski_XY_Server.Services
 
             var paintings = await _context
                 .Paintings
-                .Include(p => p.Images.OrderBy(i => !i.IsMainImage))
+                .Include(p => p.PaintingImages.OrderBy(i => !i.IsMainImage))
                 .Where(p => !p.IsAvailableToSell && !p.IsDeleted)
                 .Take(6)
                 .ToListAsync();
@@ -205,7 +203,7 @@ namespace Karpinski_XY_Server.Services
 
             var paintings = await _context
                 .Paintings
-                .Include(p => p.Images.Where(i => i.IsMainImage))
+                .Include(p => p.PaintingImages.Where(i => i.IsMainImage))
                 .Where(p => p.IsAvailableToSell && p.IsDeleted == false && p.IsOnFocus == true)
                 .OrderByDescending(p => p.CreatedOn)
                 .ToListAsync();
@@ -218,7 +216,7 @@ namespace Karpinski_XY_Server.Services
         private Painting FindPaintingById(Guid id)
         => _context
             .Paintings
-            .Include(p=>p.Images
+            .Include(p=>p.PaintingImages
                 .Where(i=>!i.IsDeleted)
                 .OrderBy(i=>!i.IsMainImage))
             .Where(p => p.Id == id)

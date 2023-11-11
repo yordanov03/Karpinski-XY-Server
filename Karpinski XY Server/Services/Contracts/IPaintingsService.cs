@@ -1,5 +1,5 @@
 ﻿using Karpinski_XY_Server.Data.Models.Base;
-using Karpinski_XY_Server.Dtos;
+using Karpinski_XY_Server.Dtos.Painting;
 
 namespace Karpinski_XY_Server.Services.Contracts
 {

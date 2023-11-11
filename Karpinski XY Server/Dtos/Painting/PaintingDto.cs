@@ -1,6 +1,6 @@
 ﻿using Karpinski_XY_Server.Data.Models;
 
-namespace Karpinski_XY_Server.Dtos
+namespace Karpinski_XY_Server.Dtos.Painting
 {
     public class PaintingDto
     {
@@ -25,6 +25,6 @@ namespace Karpinski_XY_Server.Dtos
         public int Year { get; set; }
 
         public bool IsOnFocus { get; set; }
-        public List<ImageDto> Images{ get; set; } = new List<ImageDto>();
+        public List<PaintingImageDto> PaintingImages { get; set; } = new List<PaintingImageDto>();
     }
 }

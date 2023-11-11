@@ -1,15 +1,15 @@
-﻿using Karpinski_XY_Server.Dtos;
+﻿using Karpinski_XY_Server.Dtos.Painting;
 using Karpinski_XY_Server.Services.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Karpinski_XY_Server.Controllers
 {
-    public class PaintingsController : ApiController
+    public class PaintingController : ApiController
     {
         private readonly IPaintingsService _paintingsService;
 
-        public PaintingsController(IPaintingsService paintingsService)
+        public PaintingController(IPaintingsService paintingsService)
         {
             _paintingsService = paintingsService;
         }

@@ -1,7 +1,7 @@
-﻿using Karpinski_XY_Server.Data.Models;
-using Karpinski_XY_Server.Data.Models.Base;
+﻿using Karpinski_XY_Server.Data.Models.Base;
 using Karpinski_XY_Server.Data.Models.Configuration;
-using Karpinski_XY_Server.Dtos;
+using Karpinski_XY_Server.Data.Models.Painting;
+using Karpinski_XY_Server.Dtos.Painting;
 using Karpinski_XY_Server.Services.Contracts;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
@@ -19,7 +19,7 @@ namespace Karpinski_XY_Server.Services
             IOptions<ImageFiles> imageFiles,
             IWebHostEnvironment env)
         {
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger = logger;
             _imageFiles = imageFiles.Value;
             _env = env;
         }
@@ -29,7 +29,7 @@ namespace Karpinski_XY_Server.Services
         /// </summary>
         /// <param name="imageDtos"></param>
         /// <returns></returns>
-        public async Task<Result<List<ImageDto>>> UpdateImagePathsAsync(List<ImageDto> imageDtos)
+        public async Task<Result<List<PaintingImageDto>>> UpdateImagePathsAsync(List<PaintingImageDto> imageDtos)
         {
             _logger.LogInformation("Starting to update image paths for {Count} image(s).", imageDtos.Count);
 
@@ -49,26 +49,26 @@ namespace Karpinski_XY_Server.Services
             if (errors.Count > 0)
             {
                 var aggregatedErrors = string.Join(Environment.NewLine, errors);
-                return Result<List<ImageDto>>.Fail(new List<string> { $"Validation failed:{Environment.NewLine}{aggregatedErrors}" });
+                return Result<List<PaintingImageDto>>.Fail(new List<string> { $"Validation failed:{Environment.NewLine}{aggregatedErrors}" });
             }
 
-            return Result<List<ImageDto>>.Success(imageDtos);
+            return Result<List<PaintingImageDto>>.Success(imageDtos);
         }
 
-        private async Task<string> UpdateImagePathAsync(ImageDto imageDto)
+        private async Task<string> UpdateImagePathAsync(PaintingImageDto imageDto)
         {
             try
             {
                 imageDto.Id = Guid.NewGuid();
                 var fileName = imageDto.Id + ".jpg";
-                var newPath = Path.Combine(_imageFiles.Path.TrimStart('\\', '/'), fileName);
+                var newPath = Path.Combine(_imageFiles.PaintingFilesPath.TrimStart('\\', '/'), fileName);
 
 
                 var imageBytes = Convert.FromBase64String(imageDto.File);
                 await File.WriteAllBytesAsync(newPath, imageBytes);
 
                 imageDto.File = null;  // Clear the Base64 string as it's no longer needed
-                imageDto.ImageUrl = $"{GetBaseUrlFromLaunchSettings()}{_imageFiles.Path}\\{fileName}";  // Set the URL to the path where the file is stored
+                imageDto.ImageUrl = $"{GetBaseUrlFromLaunchSettings()}{_imageFiles.PaintingFilesPath}\\{fileName}";  // Set the URL to the path where the file is stored
                 _logger.LogInformation("Successfully updated image path for image: {FileName}", fileName);
 
                 return null;
@@ -82,7 +82,7 @@ namespace Karpinski_XY_Server.Services
         }
 
         // Image to string
-        public async Task<Result<List<ImageDto>>> ConvertImagePathsToBase64Async(List<ImageDto> imageDtos)
+        public async Task<Result<List<PaintingImageDto>>> ConvertImagePathsToBase64Async(List<PaintingImageDto> imageDtos)
         {
             _logger.LogInformation("Starting to convert image paths to Base64 for {Count} image(s).", imageDtos.Count);
 
@@ -102,36 +102,20 @@ namespace Karpinski_XY_Server.Services
             if (errors.Count > 0)
             {
                 var aggregatedErrors = string.Join(Environment.NewLine, errors);
-                return Result<List<ImageDto>>.Fail(new List<string> { $"Validation failed:{Environment.NewLine}{aggregatedErrors}" });
+                return Result<List<PaintingImageDto>>.Fail(new List<string> { $"Validation failed:{Environment.NewLine}{aggregatedErrors}" });
             }
 
-            return Result<List<ImageDto>>.Success(imageDtos);
+            return Result<List<PaintingImageDto>>.Success(imageDtos);
         }
 
-        private async Task<string> ConvertImagePathToBase64Async(ImageDto imageDto)
+        private async Task<string> ConvertImagePathToBase64Async(PaintingImageDto imageDto)
         {
-            //try
-            //{
-            //    var filePath = Path.Combine(_imageFiles.Path, imageDto.ImageUrl);
-            //    var imageBytes = await File.ReadAllBytesAsync(filePath);
-            //    imageDto.File = Convert.ToBase64String(imageBytes); // Set the Base64 string
-
-            //    _logger.LogInformation("Successfully converted image path to Base64 for image: {FileName}", imageDto.ImageUrl);
-
-            //    return null;
-            //}
-            //catch (Exception ex)
-            //{
-            //    var errorMessage = $"Failed to convert image path to Base64 for {imageDto.ImageUrl}: {ex.Message}";
-            //    _logger.LogError(ex, "Error while converting image path to Base64 for image: {FileName}", imageDto.ImageUrl);
-            //    return errorMessage;
-            //}
             try
             {
                 var baseUrl = GetBaseUrlFromLaunchSettings();
                 var relativePath = imageDto.ImageUrl.Replace(baseUrl, string.Empty);
 
-                var filePath = Path.Combine(_imageFiles.Path, relativePath);
+                var filePath = Path.Combine(_imageFiles.PaintingFilesPath, relativePath);
                 var fullPath = $"{Directory.GetCurrentDirectory()}{filePath}";
                 var imageBytes = await File.ReadAllBytesAsync(fullPath);
 
@@ -165,19 +149,18 @@ namespace Karpinski_XY_Server.Services
             return firstUrl;
         }
 
-        public void MarkDeletedImagesAsDeleted(List<ImageDto> imageDtos, List<Image> images)
+        //Other
+
+        public void MarkDeletedImagesAsDeleted(List<PaintingImageDto> imageDtos, List<PaintingImage> images)
         {
             var imageDtoIds = new HashSet<Guid>(imageDtos.Select(dto => dto.Id));
 
-            // Iterate over the images and set IsDeleted to true if the Id is not in the HashSet.
             images.ForEach(image => {
                 if (!imageDtoIds.Contains(image.Id))
                 {
                     image.IsDeleted = true;
                 }
             });
-
-            // Since the method is void, there is no return statement needed.
         }
     }
 }

@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Karpinski_XY_Server.Dtos
+namespace Karpinski_XY_Server.Dtos.Painting
 {
-    public class ImageDto
+    public class PaintingImageDto
     {
         public Guid Id { get; set; }
         public string? ImageUrl { get; set; }
@@ -11,6 +11,6 @@ namespace Karpinski_XY_Server.Dtos
 
         public string? File { get; set; }
 
-        public Guid PaintingId { get; set; }
+        public Guid EntityId { get; set; }
     }
 }
