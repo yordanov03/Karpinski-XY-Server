@@ -192,6 +192,7 @@ namespace Karpinski_XY_Server.Services
                 .Paintings
                 .Include(p => p.Images.OrderBy(i => !i.IsMainImage))
                 .Where(p => !p.IsAvailableToSell && !p.IsDeleted)
+                .Take(6)
                 .ToListAsync();
 
             return Result<IEnumerable<PaintingDto>>.Success(_mapper.Map<IEnumerable<PaintingDto>>(paintings));
