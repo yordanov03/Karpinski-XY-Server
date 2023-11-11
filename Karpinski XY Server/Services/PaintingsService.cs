@@ -62,36 +62,9 @@ namespace Karpinski_XY_Server.Services
             return Result<Guid>.Success(model.Id);
         }
 
-
-        public async Task<Result<IEnumerable<PaintingDto>>> GetAllPaintings()
+        public async Task<Result<PaintingDto>> GetPaintingToEdit(Guid id)
         {
-            _logger.LogInformation("Fetching all paintings");
-
-            var paintings = await _context
-                .Paintings
-                .Include(p => p.Images.Where(i=>i.IsMainImage))
-                .Where(p => !p.IsDeleted)
-                .ToListAsync();
-
-            return Result<IEnumerable<PaintingDto>>.Success(_mapper.Map<IEnumerable<PaintingDto>>(paintings));
-        }
-
-        public async Task<Result<IEnumerable<PaintingDto>>> GetAvailablePaintings()
-        {
-            _logger.LogInformation("Fetching all available paintings");
-
-            var paintings = await _context
-                .Paintings
-                .Include(p => p.Images.Where(i => i.IsMainImage))
-                .Where(p => p.IsAvailableToSell && !p.IsDeleted)
-                .ToListAsync();
-
-            return Result<IEnumerable<PaintingDto>>.Success(_mapper.Map<IEnumerable<PaintingDto>>(paintings));
-        }
-
-        public async Task<Result<PaintingDto>> GetPaintingById(Guid id)
-        {
-            _logger.LogInformation($"Fetching painting with id {id}");
+            _logger.LogInformation($"Fetching painting with id {id} to edit");
 
             var painting = FindPaintingById(id);
             if (painting == null)
@@ -99,20 +72,19 @@ namespace Karpinski_XY_Server.Services
                 return Result<PaintingDto>.Fail($"Painting with ID {id} not found.");
             }
 
-            return Result<PaintingDto>.Success(_mapper.Map<PaintingDto>(painting));
-        }
+            //painting.Images = this._context.Images.Where(i => i.PaintingId == id).ToList();
+            var paintingDto = _mapper.Map<PaintingDto>(painting);
 
-        public async Task<Result<IEnumerable<PaintingDto>>> GetPortfolioPaintings()
-        {
-            _logger.LogInformation("Fetching portfolio paintings");
+            // Convert image paths to Base64 strings
+            var imageConversionResult = await _fileService.ConvertImagePathsToBase64Async(paintingDto.Images);
+            if (!imageConversionResult.Succeeded)
+            {
+                return Result<PaintingDto>.Fail(imageConversionResult.Errors);
+            }
 
-            var paintings = await _context
-                .Paintings
-                .Include(p => p.Images)
-                .Where(p => !p.IsAvailableToSell)
-                .ToListAsync();
+            paintingDto.Images = imageConversionResult.Value;
 
-            return Result<IEnumerable<PaintingDto>>.Success(_mapper.Map<IEnumerable<PaintingDto>>(paintings));
+            return Result<PaintingDto>.Success(paintingDto);
         }
 
         public async Task<Result<PaintingDto>> Update(PaintingDto model)
@@ -172,6 +144,61 @@ namespace Karpinski_XY_Server.Services
             return Result<bool>.Success(true);
         }
 
+
+        public async Task<Result<IEnumerable<PaintingDto>>> GetAllPaintings()
+        {
+            _logger.LogInformation("Fetching all paintings");
+
+            var paintings = await _context
+                .Paintings
+                .Include(p => p.Images.Where(i=>i.IsMainImage))
+                .Where(p => !p.IsDeleted)
+                .ToListAsync();
+
+            return Result<IEnumerable<PaintingDto>>.Success(_mapper.Map<IEnumerable<PaintingDto>>(paintings));
+        }
+
+        public async Task<Result<IEnumerable<PaintingDto>>> GetAvailablePaintings()
+        {
+            _logger.LogInformation("Fetching all available paintings");
+
+            var paintings = await _context
+                .Paintings
+                .Include(p => p.Images.Where(i => i.IsMainImage))
+                .Where(p => p.IsAvailableToSell && !p.IsDeleted)
+                .ToListAsync();
+
+            return Result<IEnumerable<PaintingDto>>.Success(_mapper.Map<IEnumerable<PaintingDto>>(paintings));
+        }
+
+        public async Task<Result<PaintingDto>> GetPaintingById(Guid id)
+        {
+            _logger.LogInformation($"Fetching painting with id {id}");
+
+            var painting = FindPaintingById(id);
+            if (painting == null)
+            {
+                return Result<PaintingDto>.Fail($"Painting with ID {id} not found.");
+            }
+
+            return Result<PaintingDto>.Success(_mapper.Map<PaintingDto>(painting));
+        }
+
+        public async Task<Result<IEnumerable<PaintingDto>>> GetPortfolioPaintings()
+        {
+            _logger.LogInformation("Fetching portfolio paintings");
+
+            var paintings = await _context
+                .Paintings
+                .Include(p => p.Images.OrderBy(i => !i.IsMainImage))
+                .Where(p => !p.IsAvailableToSell && !p.IsDeleted)
+                .Take(6)
+                .ToListAsync();
+
+            return Result<IEnumerable<PaintingDto>>.Success(_mapper.Map<IEnumerable<PaintingDto>>(paintings));
+        }
+
+        
         public async Task<Result<IEnumerable<PaintingDto>>> GetPaintingsOnFocus()
         {
             _logger.LogInformation($"Getting paintings on focus");
@@ -185,31 +212,6 @@ namespace Karpinski_XY_Server.Services
 
             var mapped = _mapper.Map<List<Painting>, IEnumerable<PaintingDto>>(paintings);
             return Result<IEnumerable<PaintingDto>>.Success(mapped);
-        }
-
-        public async Task<Result<PaintingDto>> GetPaintingToEdit(Guid id)
-        {
-            _logger.LogInformation($"Fetching painting with id {id} to edit");
-
-            var painting = FindPaintingById(id);
-            if (painting == null)
-            {
-                return Result<PaintingDto>.Fail($"Painting with ID {id} not found.");
-            }
-
-            //painting.Images = this._context.Images.Where(i => i.PaintingId == id).ToList();
-            var paintingDto = _mapper.Map<PaintingDto>(painting);
-
-            // Convert image paths to Base64 strings
-            var imageConversionResult = await _fileService.ConvertImagePathsToBase64Async(paintingDto.Images);
-            if (!imageConversionResult.Succeeded)
-            {
-                return Result<PaintingDto>.Fail(imageConversionResult.Errors);
-            }
-
-            paintingDto.Images = imageConversionResult.Value;
-
-            return Result<PaintingDto>.Success(paintingDto);
         }
 
 

@@ -1,4 +1,4 @@
-﻿using Karpinski_XY;
+﻿using Karpinski_XY_Server.Data.Models.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;

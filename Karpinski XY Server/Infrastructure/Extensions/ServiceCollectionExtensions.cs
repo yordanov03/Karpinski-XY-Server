@@ -68,7 +68,8 @@ namespace Karpinski_XY.Infrastructure.Extensions
 
         public static IServiceCollection AddSmtpSettings(this IServiceCollection services, IConfiguration configuration)
         => services.Configure<SmtpSettings>(configuration.GetSection("SmtpSettings"))
-                    .Configure<ImageFiles>(configuration.GetSection("ImageFiles"));
+                    .Configure<ImageFiles>(configuration.GetSection("ImageFiles"))
+                    .Configure<MailchimpSettings>(configuration.GetSection("Mailchimp"));
 
         public static void AddApplicationServices(this IServiceCollection services)
              => services.RegisterAssemblyPublicNonGenericClasses()

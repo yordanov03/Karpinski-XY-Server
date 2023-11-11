@@ -1,11 +1,12 @@
 ﻿using Microsoft.Extensions.Options;
-using System.Net.Mail;
 using System.Net;
 using MimeKit;
-using MailKit.Net.Smtp;
-using Karpinski_XY_Server.Features.Inquiry.Models;
+using Karpinski_XY_Server.Services.Contracts;
+using Karpinski_XY_Server.Dtos;
+using Karpinski_XY_Server.Data.Models.Configuration;
+using Karpinski_XY_Server.Helpers;
 
-namespace Karpinski_XY_Server.Features.inquiry
+namespace Karpinski_XY_Server.Services
 {
     public class InquiryEmailSenderService : IinquiryEmailSenderService
     {
@@ -16,15 +17,15 @@ namespace Karpinski_XY_Server.Features.inquiry
             _smtpSettings = smtpSettings.Value;
         }
 
-        public async Task<string> SendEmailAsync(InquiryDto inquiry)
+        public async Task<string> SendEmailAsync(ContactDto inquiry)
         {
-            var caseNumber = new Random().Next(100,99999);
+            var caseNumber = new Random().Next(100, 99999);
 
             // send message to Requestor
             var messageToRequestor = new MimeMessage();
             messageToRequestor.From.Add(MailboxAddress.Parse(_smtpSettings.SenderEmail));
             messageToRequestor.To.Add(MailboxAddress.Parse(inquiry.Email));
-            messageToRequestor.Cc.Add(MailboxAddress.Parse("svetoslav.yordanov.003@gmail.com"));
+            messageToRequestor.Cc.Add(MailboxAddress.Parse(_smtpSettings.CCEmail));
             messageToRequestor.Subject = $"inquiry: {caseNumber} " + inquiry.Subject;
             messageToRequestor.Body = new TextPart("html")
             {

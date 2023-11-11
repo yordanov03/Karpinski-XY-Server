@@ -33,44 +33,13 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpGet]
-        [AllowAnonymous]
-        [Route("available", Name = "available")]
-        [ProducesResponseType(typeof(IEnumerable<PaintingDto>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetAvailablePaintings()
-        {
-            var result = await _paintingsService.GetAvailablePaintings();
-            if (result.Succeeded)
-            {
-                return Ok(result.Value);
-            }
-
-            return BadRequest(result.Errors);
-        }
-
-        [HttpGet]
         [Authorize]
         [Route("toEdit/{id}", Name = "getPaintingToEdit")]
-        [ProducesResponseType (typeof(PaintingDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PaintingDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetPaintingToEdit(Guid id)
         {
             var result = await _paintingsService.GetPaintingToEdit(id);
-            if (result.Succeeded)
-            {
-                return Ok(result.Value);
-            }
-
-            return BadRequest(result.Errors);
-        }
-
-        [HttpGet]
-        [AllowAnonymous]
-        [Route("{id}", Name = "getPainting")]
-        [ProducesResponseType(typeof(PaintingDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> GetPainting(Guid id)
-        {
-            var result = await _paintingsService.GetPaintingById(id);
             if (result.Succeeded)
             {
                 return Ok(result.Value);
@@ -103,6 +72,53 @@ namespace Karpinski_XY_Server.Controllers
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _paintingsService.Delete(id);
+            if (result.Succeeded)
+            {
+                return Ok(result.Value);
+            }
+
+            return BadRequest(result.Errors);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("portfolio", Name = "portfolio")]
+        [ProducesResponseType(typeof(IEnumerable<PaintingDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetPortfolioPaintings()
+        {
+            var result = await _paintingsService.GetPortfolioPaintings();
+            if (result.Succeeded)
+            {
+                return Ok(result.Value);
+            }
+
+            return BadRequest(result.Errors);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("available", Name = "available")]
+        [ProducesResponseType(typeof(IEnumerable<PaintingDto>), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetAvailablePaintings()
+        {
+            var result = await _paintingsService.GetAvailablePaintings();
+            if (result.Succeeded)
+            {
+                return Ok(result.Value);
+            }
+
+            return BadRequest(result.Errors);
+        }
+
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("{id}", Name = "loadPainting")]
+        [ProducesResponseType(typeof(PaintingDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetPainting(Guid id)
+        {
+            var result = await _paintingsService.GetPaintingById(id);
             if (result.Succeeded)
             {
                 return Ok(result.Value);
