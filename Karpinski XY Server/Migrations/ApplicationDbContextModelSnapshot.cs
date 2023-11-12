@@ -72,7 +72,7 @@ namespace Karpinski_XY_Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Exhibitions");
+                    b.ToTable("Exhibitions", (string)null);
                 });
 
             modelBuilder.Entity("Karpinski_XY_Server.Data.Models.ExhibitionImage", b =>
@@ -107,7 +107,7 @@ namespace Karpinski_XY_Server.Migrations
 
                     b.HasIndex("EntityId");
 
-                    b.ToTable("ExhibitionImages");
+                    b.ToTable("ExhibitionImages", (string)null);
                 });
 
             modelBuilder.Entity("Karpinski_XY_Server.Data.Models.PaintingImage", b =>
@@ -142,7 +142,7 @@ namespace Karpinski_XY_Server.Migrations
 
                     b.HasIndex("EntityId");
 
-                    b.ToTable("PaintingImages");
+                    b.ToTable("PaintingImages", (string)null);
                 });
 
             modelBuilder.Entity("Karpinski_XY_Server.Models.Painting", b =>
@@ -198,7 +198,7 @@ namespace Karpinski_XY_Server.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Paintings");
+                    b.ToTable("Paintings", (string)null);
                 });
 
             modelBuilder.Entity("Karpinski_XY.Models.User", b =>

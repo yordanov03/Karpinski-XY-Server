@@ -3,11 +3,9 @@ using FluentValidation;
 using Karpinski_XY.Data;
 using Karpinski_XY_Server.Data.Models.Base;
 using Karpinski_XY_Server.Data.Models.Exhibition;
-using Karpinski_XY_Server.Data.Models.Painting;
 using Karpinski_XY_Server.Dtos.Exhibition;
 using Karpinski_XY_Server.Dtos.Painting;
 using Karpinski_XY_Server.Services.Contracts;
-using MailChimp.Net.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Karpinski_XY_Server.Services
@@ -18,16 +16,19 @@ namespace Karpinski_XY_Server.Services
         private readonly IValidator<ExhibitionDto> _exhibitionValidator;
         private readonly IMapper _mapper;
         private readonly ILogger<ExhibitionService> _logger;
+        private readonly IFileService<ExhibitionImageDto> _fileService;
 
         public ExhibitionService(ApplicationDbContext context,
                                   IValidator<ExhibitionDto> exhibitionValidator,
                                   IMapper mapper,
-                                  ILogger<ExhibitionService> logger)
+                                  ILogger<ExhibitionService> logger,
+                                  IFileService<ExhibitionImageDto> fileService)
         {
             _context = context;
             _exhibitionValidator = exhibitionValidator;
             _mapper = mapper;
             _logger = logger;
+            _fileService = fileService;
         }
 
         public async Task<Result<Guid>> CreateExhibition(ExhibitionDto model)
@@ -45,14 +46,14 @@ namespace Karpinski_XY_Server.Services
 
             model.Id = Guid.NewGuid();
 
-            var updateResult = await _fileService.UpdateImagePathsAsync(model.PaintingImages);
+            var updateResult = await _fileService.UpdateImagePathsAsync(model.ExhibitionImages);
 
             if (!updateResult.Succeeded)
             {
                 return Result<Guid>.Fail("Failed to update image paths.");
             }
 
-            model.PaintingImages = updateResult.Value;
+            model.ExhibitionImages = updateResult.Value;
 
             var exhibition = _mapper.Map<Exhibition>(model);
             _context.Add(exhibition);
@@ -119,13 +120,13 @@ namespace Karpinski_XY_Server.Services
 
 
             // Convert image paths to Base64 strings
-            var imageConversionResult = await _fileService.ConvertImagePathsToBase64Async(paintingDto.PaintingImages);
+            var imageConversionResult = await _fileService.ConvertImagePathsToBase64Async(exhibitionDto.ExhibitionImages);
             if (!imageConversionResult.Succeeded)
             {
-                return Result<PaintingDto>.Fail(imageConversionResult.Errors);
+                return Result<ExhibitionDto>.Fail(imageConversionResult.Errors);
             }
 
-            paintingDto.PaintingImages = imageConversionResult.Value;
+            exhibitionDto.ExhibitionImages = imageConversionResult.Value;
 
             return Result<ExhibitionDto>.Success(exhibitionDto);
         }
@@ -150,9 +151,9 @@ namespace Karpinski_XY_Server.Services
                 return Result<ExhibitionDto>.Fail("Exhibition not found.");
             }
 
-            this._fileService.MarkDeletedImagesAsDeleted(model.PaintingImages, painting.PaintingImages);
+            this._fileService.MarkDeletedImagesAsDeleted(model.ExhibitionImages, exhibition.ExhibitionImages.Cast<ImageBase>().ToList());
 
-            var imagesWithoutPath = model.PaintingImages.Where(i => string.IsNullOrEmpty(i.ImageUrl)).ToList();
+            var imagesWithoutPath = model.ExhibitionImages.Where(i => string.IsNullOrEmpty(i.ImageUrl)).ToList();
             if (imagesWithoutPath.Any())
             {
                 await _fileService.UpdateImagePathsAsync(imagesWithoutPath);

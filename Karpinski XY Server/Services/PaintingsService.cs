@@ -14,13 +14,13 @@ namespace Karpinski_XY_Server.Services
         private readonly ApplicationDbContext _context;
         private readonly IValidator<PaintingDto> _paintingValidator;
         private readonly IMapper _mapper;
-        private readonly IFileService _fileService;
+        private readonly IFileService<PaintingImageDto> _fileService;
         private readonly ILogger<PaintingsService> _logger;
 
         public PaintingsService(ApplicationDbContext context,
             IValidator<PaintingDto> paintingValidator,
             IMapper mapper,
-            IFileService fileService,
+            IFileService<PaintingImageDto> fileService,
             ILogger<PaintingsService> logger)
         {
             _context = context;
@@ -105,7 +105,7 @@ namespace Karpinski_XY_Server.Services
                 return Result<PaintingDto>.Fail("Painting not found.");
             }
 
-            this._fileService.MarkDeletedImagesAsDeleted(model.PaintingImages, painting.PaintingImages);
+            this._fileService.MarkDeletedImagesAsDeleted(model.PaintingImages, painting.PaintingImages.Cast<ImageBase>().ToList());
 
             var imagesWithoutPath = model.PaintingImages.Where(i => string.IsNullOrEmpty(i.ImageUrl)).ToList();
             if (imagesWithoutPath.Any())
@@ -163,7 +163,7 @@ namespace Karpinski_XY_Server.Services
             var paintings = await _context
                 .Paintings
                 .Include(p => p.PaintingImages.Where(i => i.IsMainImage))
-                .Where(p => p.IsAvailableToSell && !p.IsDeleted)
+                .Where(p => p.IsAvailableToSell && !p.IsDeleted && !p.IsOnFocus)
                 .ToListAsync();
 
             return Result<IEnumerable<PaintingDto>>.Success(_mapper.Map<IEnumerable<PaintingDto>>(paintings));

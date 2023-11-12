@@ -1,21 +1,23 @@
 ﻿using Karpinski_XY_Server.Data.Models.Base;
 using Karpinski_XY_Server.Data.Models.Configuration;
 using Karpinski_XY_Server.Data.Models.Painting;
+using Karpinski_XY_Server.Dtos.BaseDto;
+using Karpinski_XY_Server.Dtos.Exhibition;
 using Karpinski_XY_Server.Dtos.Painting;
 using Karpinski_XY_Server.Services.Contracts;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 
-namespace Karpinski_XY_Server.Services
+namespace Karpinski_XY_Server.Services.FileServices
 {
-    public class FileService : IFileService
+    public abstract class FileService<T> : IFileService<T> where T : ImageBaseDto
     {
-        private readonly ILogger<FileService> _logger;
+        private readonly ILogger<FileService<T>> _logger;
         private readonly ImageFiles _imageFiles;
         private readonly IWebHostEnvironment _env;
 
 
-        public FileService(ILogger<FileService> logger,
+        public FileService(ILogger<FileService<T>> logger,
             IOptions<ImageFiles> imageFiles,
             IWebHostEnvironment env)
         {
@@ -29,7 +31,7 @@ namespace Karpinski_XY_Server.Services
         /// </summary>
         /// <param name="imageDtos"></param>
         /// <returns></returns>
-        public async Task<Result<List<PaintingImageDto>>> UpdateImagePathsAsync(List<PaintingImageDto> imageDtos)
+        public async Task<Result<List<T>>> UpdateImagePathsAsync(List<T> imageDtos)
         {
             _logger.LogInformation("Starting to update image paths for {Count} image(s).", imageDtos.Count);
 
@@ -49,19 +51,22 @@ namespace Karpinski_XY_Server.Services
             if (errors.Count > 0)
             {
                 var aggregatedErrors = string.Join(Environment.NewLine, errors);
-                return Result<List<PaintingImageDto>>.Fail(new List<string> { $"Validation failed:{Environment.NewLine}{aggregatedErrors}" });
+                return Result<List<T>>.Fail(new List<string> { $"Validation failed:{Environment.NewLine}{aggregatedErrors}" });
             }
 
-            return Result<List<PaintingImageDto>>.Success(imageDtos);
+            return Result<List<T>>.Success(imageDtos);
         }
 
-        private async Task<string> UpdateImagePathAsync(PaintingImageDto imageDto)
+        private async Task<string> UpdateImagePathAsync(T imageDto)
         {
             try
             {
+                //imageDto.Id = Guid.NewGuid();
+                //var fileName = imageDto.Id + ".jpg";
+                //var newPath = Path.Combine(_imageFiles.PaintingFilesPath.TrimStart('\\', '/'), fileName);
                 imageDto.Id = Guid.NewGuid();
                 var fileName = imageDto.Id + ".jpg";
-                var newPath = Path.Combine(_imageFiles.PaintingFilesPath.TrimStart('\\', '/'), fileName);
+                var newPath = ConstructPathForDatabase(imageDto);
 
 
                 var imageBytes = Convert.FromBase64String(imageDto.File);
@@ -82,7 +87,7 @@ namespace Karpinski_XY_Server.Services
         }
 
         // Image to string
-        public async Task<Result<List<PaintingImageDto>>> ConvertImagePathsToBase64Async(List<PaintingImageDto> imageDtos)
+        public async Task<Result<List<T>>> ConvertImagePathsToBase64Async(List<T> imageDtos)
         {
             _logger.LogInformation("Starting to convert image paths to Base64 for {Count} image(s).", imageDtos.Count);
 
@@ -102,21 +107,22 @@ namespace Karpinski_XY_Server.Services
             if (errors.Count > 0)
             {
                 var aggregatedErrors = string.Join(Environment.NewLine, errors);
-                return Result<List<PaintingImageDto>>.Fail(new List<string> { $"Validation failed:{Environment.NewLine}{aggregatedErrors}" });
+                return Result<List<T>>.Fail(new List<string> { $"Validation failed:{Environment.NewLine}{aggregatedErrors}" });
             }
 
-            return Result<List<PaintingImageDto>>.Success(imageDtos);
+            return Result<List<T>>.Success(imageDtos);
         }
 
-        private async Task<string> ConvertImagePathToBase64Async(PaintingImageDto imageDto)
+        private async Task<string> ConvertImagePathToBase64Async(T imageDto)
         {
             try
             {
-                var baseUrl = GetBaseUrlFromLaunchSettings();
-                var relativePath = imageDto.ImageUrl.Replace(baseUrl, string.Empty);
+                //var baseUrl = GetBaseUrlFromLaunchSettings();
+                //var relativePath = imageDto.ImageUrl.Replace(baseUrl, string.Empty);
 
-                var filePath = Path.Combine(_imageFiles.PaintingFilesPath, relativePath);
-                var fullPath = $"{Directory.GetCurrentDirectory()}{filePath}";
+                //var filePath = Path.Combine(_imageFiles.PaintingFilesPath, relativePath);
+                //var fullPath = $"{Directory.GetCurrentDirectory()}{filePath}";
+                var fullPath = ConstructPathForConversionTo64Base(imageDto);
                 var imageBytes = await File.ReadAllBytesAsync(fullPath);
 
                 imageDto.File = Convert.ToBase64String(imageBytes); // Set the Base64 string
@@ -151,16 +157,59 @@ namespace Karpinski_XY_Server.Services
 
         //Other
 
-        public void MarkDeletedImagesAsDeleted(List<PaintingImageDto> imageDtos, List<PaintingImage> images)
+        public void MarkDeletedImagesAsDeleted(List<T> imageDtos, List<ImageBase> images)
         {
             var imageDtoIds = new HashSet<Guid>(imageDtos.Select(dto => dto.Id));
 
-            images.ForEach(image => {
+            images.ForEach(image =>
+            {
                 if (!imageDtoIds.Contains(image.Id))
                 {
                     image.IsDeleted = true;
                 }
             });
         }
+
+
+        protected string ConstructPathForConversionTo64Base(T imageDto)
+        {
+            //var baseUrl = GetBaseUrlFromLaunchSettings();
+            //var relativePath = imageDto.ImageUrl.Replace(baseUrl, string.Empty);
+
+            //var filePath = Path.Combine(_imageFiles.PaintingFilesPath, relativePath);
+            //var fullPath = $"{Directory.GetCurrentDirectory()}{filePath}";
+            var baseUrl = GetBaseUrlFromLaunchSettings();
+            var relativePath = imageDto.ImageUrl.Replace(baseUrl, string.Empty);
+            var directory = GetFilesPath();
+            var filePath = Path.Combine(directory, relativePath);
+            var fullPath = $"{Directory.GetCurrentDirectory()}{filePath}";
+
+            return fullPath;
+        }
+
+        protected string ConstructPathForDatabase(T imageDto)
+        {
+            var fileName = imageDto.Id + ".jpg";
+            var directory = GetFilesPath();
+            var newPath = Path.Combine(directory.TrimStart('\\', '/'), fileName);
+            return newPath;
+        }
+
+        protected string GetFilesPath()
+        {
+            if (typeof(T) == typeof(PaintingImageDto))
+            {
+                return _imageFiles.PaintingFilesPath;
+            }
+            else if (typeof(T) == typeof(ExhibitionImageDto))
+            {
+                return _imageFiles.ExhibitionFilesPath;
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+
     }
 }

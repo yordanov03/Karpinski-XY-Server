@@ -13,4 +13,4 @@ namespace Karpinski_XY_Server.Services.Contracts
         Task<Result<bool>> DeleteExhibition(Guid id);
     }
 }
-}
+

@@ -15,7 +15,8 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+        //[Authorize]
+        [AllowAnonymous]
         [DisableRequestSizeLimit]
         [Route("", Name = "create")]
         [ProducesResponseType(StatusCodes.Status200OK)]
