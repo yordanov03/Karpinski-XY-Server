@@ -1,6 +1,5 @@
 ﻿using Karpinski_XY_Server.Data.Models.Base;
 using Karpinski_XY_Server.Data.Models.Configuration;
-using Karpinski_XY_Server.Data.Models.Painting;
 using Karpinski_XY_Server.Dtos.BaseDto;
 using Karpinski_XY_Server.Dtos.Exhibition;
 using Karpinski_XY_Server.Dtos.Painting;
@@ -73,7 +72,7 @@ namespace Karpinski_XY_Server.Services.FileServices
                 await File.WriteAllBytesAsync(newPath, imageBytes);
 
                 imageDto.File = null;  // Clear the Base64 string as it's no longer needed
-                imageDto.ImageUrl = $"{GetBaseUrlFromLaunchSettings()}{_imageFiles.PaintingFilesPath}\\{fileName}";  // Set the URL to the path where the file is stored
+                imageDto.ImageUrl = $"{GetBaseUrlFromLaunchSettings()}\\{newPath}";  // Set the URL to the path where the file is stored
                 _logger.LogInformation("Successfully updated image path for image: {FileName}", fileName);
 
                 return null;
@@ -182,7 +181,7 @@ namespace Karpinski_XY_Server.Services.FileServices
             var relativePath = imageDto.ImageUrl.Replace(baseUrl, string.Empty);
             var directory = GetFilesPath();
             var filePath = Path.Combine(directory, relativePath);
-            var fullPath = $"{Directory.GetCurrentDirectory()}{filePath}";
+            var fullPath = $"{Directory.GetCurrentDirectory()}\\{filePath}";
 
             return fullPath;
         }

@@ -15,7 +15,8 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+        //[Authorize]
+        [AllowAnonymous]
         [DisableRequestSizeLimit]
         [Route("", Name = "CreateExhibition")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -33,7 +34,7 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        [AllowAnonymous]
         [Route("{id}", Name = "GetExhibition")]
         [ProducesResponseType(typeof(ExhibitionDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -50,7 +51,8 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        //[Authorize]
+        [AllowAnonymous]
         [Route("toEdit/{id}", Name = "GetExhibitionToEdit")]
         [ProducesResponseType(typeof(ExhibitionDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -66,7 +68,7 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        [AllowAnonymous]
         [Route("", Name = "GetAllExhibitions")]
         [ProducesResponseType(typeof(IEnumerable<ExhibitionDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -83,11 +85,12 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpPut]
-        [Authorize]
-        [Route("{id}", Name = "UpdateExhibition")]
+        //[Authorize]
+        [AllowAnonymous]
+        [Route("", Name = "UpdateExhibition")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<IActionResult> Update(Guid id, [FromBody] ExhibitionDto model)
+        public async Task<IActionResult> Update([FromBody] ExhibitionDto model)
         {
             var result = await _exhibitionService.UpdateExhibition(model);
 
@@ -100,7 +103,8 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpDelete]
-        [Authorize]
+        //[Authorize]
+        [AllowAnonymous]
         [Route("{id}", Name = "DeleteExhibition")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

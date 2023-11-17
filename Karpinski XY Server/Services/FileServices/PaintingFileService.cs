@@ -1,5 +1,4 @@
 ﻿using Karpinski_XY_Server.Data.Models.Configuration;
-using Karpinski_XY_Server.Dtos.Exhibition;
 using Karpinski_XY_Server.Dtos.Painting;
 using Microsoft.Extensions.Options;
 

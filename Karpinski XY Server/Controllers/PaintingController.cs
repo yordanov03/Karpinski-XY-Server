@@ -34,7 +34,8 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        //[Authorize]
+        [AllowAnonymous]
         [Route("toEdit/{id}", Name = "getPaintingToEdit")]
         [ProducesResponseType(typeof(PaintingDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -50,7 +51,8 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpPut]
-        [Authorize]
+        //[Authorize]
+        [AllowAnonymous]
         [Route("", Name = "update")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

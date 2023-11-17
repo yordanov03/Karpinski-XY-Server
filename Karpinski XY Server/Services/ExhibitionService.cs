@@ -3,8 +3,8 @@ using FluentValidation;
 using Karpinski_XY.Data;
 using Karpinski_XY_Server.Data.Models.Base;
 using Karpinski_XY_Server.Data.Models.Exhibition;
+using Karpinski_XY_Server.Data.Models.Painting;
 using Karpinski_XY_Server.Dtos.Exhibition;
-using Karpinski_XY_Server.Dtos.Painting;
 using Karpinski_XY_Server.Services.Contracts;
 using Microsoft.EntityFrameworkCore;
 
@@ -74,7 +74,9 @@ namespace Karpinski_XY_Server.Services
                 return Result<bool>.Fail($"Exhibition with ID {id} not found.");
             }
 
-            _context.Remove(exhibition);
+            exhibition.IsDeleted = true;
+            exhibition.ExhibitionImages.ForEach(image => image.IsDeleted = true);
+            _context.Update(exhibition);
             await _context.SaveChangesAsync();
 
             _logger.LogInformation("Exhibition deleted successfully");
@@ -86,7 +88,12 @@ namespace Karpinski_XY_Server.Services
         {
             _logger.LogInformation("Fetching all exhibitions");
 
-            var exhibitions = await _context.Exhibitions.ToListAsync();
+            var exhibitions = await _context
+                .Exhibitions
+                    .Include(e => e.ExhibitionImages
+                    .Where(e => e.IsMainImage))
+                    .Where(e => !e.IsDeleted)
+                .ToListAsync();
             var mapped = _mapper.Map<IEnumerable<ExhibitionDto>>(exhibitions);
 
             return Result<IEnumerable<ExhibitionDto>>.Success(mapped);
