@@ -145,5 +145,21 @@ namespace Karpinski_XY_Server.Controllers
 
             return BadRequest(result.Errors);
         }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("toSell", Name = "toSell")]
+        [ProducesResponseType(typeof(IEnumerable<PaintingDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetAllPaintingsToSell()
+        {
+            var result = await _paintingsService.GetAllPaintingsToSell();
+            if (result.Succeeded)
+            {
+                return Ok(result.Value);
+            }
+
+            return BadRequest(result.Errors);
+        }
     }
 }

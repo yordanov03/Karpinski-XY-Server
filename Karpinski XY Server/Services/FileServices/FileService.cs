@@ -1,30 +1,19 @@
 ﻿using Karpinski_XY_Server.Data.Models.Base;
-using Karpinski_XY_Server.Data.Models.Configuration;
 using Karpinski_XY_Server.Dtos.BaseDto;
-using Karpinski_XY_Server.Dtos.Exhibition;
-using Karpinski_XY_Server.Dtos.Painting;
 using Karpinski_XY_Server.Services.Contracts;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
 
 namespace Karpinski_XY_Server.Services.FileServices
 {
     public abstract class FileService<T> : IFileService<T> where T : ImageBaseDto
     {
         private readonly ILogger<FileService<T>> _logger;
-        private readonly ImageFiles _imageFiles;
-        private readonly IWebHostEnvironment _env;
         private readonly IImagePathService<T> _imagePathService;
 
 
         public FileService(ILogger<FileService<T>> logger,
-            IOptions<ImageFiles> imageFiles,
-            IWebHostEnvironment env,
             IImagePathService<T> imagePathService)
         {
             _logger = logger;
-            _imageFiles = imageFiles.Value;
-            _env = env;
             _imagePathService = imagePathService;
         }
 

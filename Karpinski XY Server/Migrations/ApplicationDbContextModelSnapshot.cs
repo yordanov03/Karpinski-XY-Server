@@ -59,10 +59,6 @@ namespace Karpinski_XY_Server.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("ShortDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
 
@@ -87,7 +83,7 @@ namespace Karpinski_XY_Server.Migrations
                     b.Property<DateTime?>("DeletedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("EntityId")
+                    b.Property<Guid?>("EntityId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("FileName")
@@ -154,10 +150,6 @@ namespace Karpinski_XY_Server.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("ShortDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Technique")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -182,7 +174,7 @@ namespace Karpinski_XY_Server.Migrations
                     b.Property<DateTime?>("DeletedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("EntityId")
+                    b.Property<Guid?>("EntityId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("FileName")
@@ -416,8 +408,7 @@ namespace Karpinski_XY_Server.Migrations
                     b.HasOne("Karpinski_XY_Server.Data.Models.Exhibition.Exhibition", "Exhibition")
                         .WithMany("ExhibitionImages")
                         .HasForeignKey("EntityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Exhibition");
                 });
@@ -427,8 +418,7 @@ namespace Karpinski_XY_Server.Migrations
                     b.HasOne("Karpinski_XY_Server.Data.Models.Painting.Painting", "Painting")
                         .WithMany("PaintingImages")
                         .HasForeignKey("EntityId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Painting");
                 });

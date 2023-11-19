@@ -143,14 +143,14 @@ namespace Karpinski_XY_Server.Services
         }
 
 
-        public async Task<Result<IEnumerable<PaintingDto>>> GetAllPaintings()
+        public async Task<Result<IEnumerable<PaintingDto>>> GetAllPaintingsToSell()
         {
             _logger.LogInformation("Fetching all paintings");
 
             var paintings = await _context
                 .Paintings
-                .Include(p => p.PaintingImages.Where(i=>i.IsMainImage))
-                .Where(p => !p.IsDeleted)
+                .Include(p => p.PaintingImages.Where(i => i.IsMainImage))
+                .Where(p => !p.IsDeleted && p.IsAvailableToSell)
                 .ToListAsync();
 
             return Result<IEnumerable<PaintingDto>>.Success(_mapper.Map<IEnumerable<PaintingDto>>(paintings));
@@ -204,7 +204,7 @@ namespace Karpinski_XY_Server.Services
             var paintings = await _context
                 .Paintings
                 .Include(p => p.PaintingImages.Where(i => i.IsMainImage))
-                .Where(p => p.IsAvailableToSell && p.IsDeleted == false && p.IsOnFocus == true)
+                .Where(p => p.IsAvailableToSell && !p.IsDeleted && p.IsOnFocus)
                 .OrderByDescending(p => p.CreatedOn)
                 .ToListAsync();
 

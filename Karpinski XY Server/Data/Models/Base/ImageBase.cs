@@ -11,6 +11,6 @@ namespace Karpinski_XY_Server.Data.Models.Base
         [Required]
         public bool IsMainImage { get; set; }
 
-        public Guid EntityId { get; set; }
+        public Guid? EntityId { get; set; }
     }
 }
