@@ -3,7 +3,10 @@
     public class ImageBaseDto
     {
         public Guid Id { get; set; }
-        public string? ImageUrl { get; set; }
+
+        public string FileName { get; set; }
+
+        public string? ImagePath { get; set; }
 
         public bool IsMainImage { get; set; }
 

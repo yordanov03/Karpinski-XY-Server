@@ -39,7 +39,7 @@ namespace Karpinski_XY.Data
                 .HasMany(e => e.ExhibitionImages)
                 .WithOne(ei => ei.Exhibition)
                 .HasForeignKey(ei => ei.EntityId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .OnDelete(DeleteBehavior.SetNull);
         }
 
         public override int SaveChanges(bool acceptAllChangesOnSuccess)

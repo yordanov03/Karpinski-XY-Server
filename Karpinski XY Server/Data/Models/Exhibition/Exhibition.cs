@@ -8,8 +8,6 @@ namespace Karpinski_XY_Server.Data.Models.Exhibition
         [Required]
         public string Title { get; set; }
 
-        [Required]
-        public string ShortDescription { get; set; }
 
         public string LongDescription { get; set; }
 

@@ -106,8 +106,9 @@ namespace Karpinski_XY_Server.Services
             }
 
             this._fileService.MarkDeletedImagesAsDeleted(model.PaintingImages, painting.PaintingImages.Cast<ImageBase>().ToList());
+            _context.Update(painting);
 
-            var imagesWithoutPath = model.PaintingImages.Where(i => string.IsNullOrEmpty(i.ImageUrl)).ToList();
+            var imagesWithoutPath = model.PaintingImages.Where(i => string.IsNullOrEmpty(i.ImagePath)).ToList();
             if (imagesWithoutPath.Any())
             {
                 await _fileService.UpdateImagePathsAsync(imagesWithoutPath);
@@ -117,9 +118,8 @@ namespace Karpinski_XY_Server.Services
             _context.Update(painting);
             await _context.SaveChangesAsync();
 
-            var updatedModel = _mapper.Map<PaintingDto>(painting);
             _logger.LogInformation($"Updated painting successfully");
-            return Result<PaintingDto>.Success(updatedModel);
+            return Result<PaintingDto>.Success(model);
         }
 
         public async Task<Result<bool>> Delete(Guid id)

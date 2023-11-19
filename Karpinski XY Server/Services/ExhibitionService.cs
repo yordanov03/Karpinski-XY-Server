@@ -159,8 +159,9 @@ namespace Karpinski_XY_Server.Services
             }
 
             this._fileService.MarkDeletedImagesAsDeleted(model.ExhibitionImages, exhibition.ExhibitionImages.Cast<ImageBase>().ToList());
+            _context.Update(exhibition);
 
-            var imagesWithoutPath = model.ExhibitionImages.Where(i => string.IsNullOrEmpty(i.ImageUrl)).ToList();
+            var imagesWithoutPath = model.ExhibitionImages.Where(i => string.IsNullOrEmpty(i.ImagePath)).ToList();
             if (imagesWithoutPath.Any())
             {
                 await _fileService.UpdateImagePathsAsync(imagesWithoutPath);
@@ -170,9 +171,8 @@ namespace Karpinski_XY_Server.Services
             _context.Update(exhibition);
             await _context.SaveChangesAsync();
 
-            var updatedModel = _mapper.Map<ExhibitionDto>(exhibition);
             _logger.LogInformation("Exhibition updated successfully");
-            return Result<ExhibitionDto>.Success(updatedModel);
+            return Result<ExhibitionDto>.Success(model);
         }
 
         private Exhibition FindExhibitionById(Guid id)

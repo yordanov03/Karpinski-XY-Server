@@ -18,8 +18,6 @@ namespace Karpinski_XY_Server.Dtos.Painting
 
         public bool IsAvailableToSell { get; set; }
 
-        public string ShortDescription { get; set; }
-
         public string Technique { get; set; }
 
         public int Year { get; set; }

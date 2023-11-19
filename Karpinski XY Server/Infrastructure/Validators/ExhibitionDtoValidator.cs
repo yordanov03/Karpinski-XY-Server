@@ -14,11 +14,6 @@ namespace Karpinski_XY_Server.Infrastructure.Validators
             RuleFor(contact => contact.Location)
                 .NotEmpty()
                 .WithMessage("Location is required.");
-
-            RuleFor(contact => contact.ShortDescription)
-                .NotEmpty()
-                .WithMessage("Short description is required.");
-
         }
     }
 }
