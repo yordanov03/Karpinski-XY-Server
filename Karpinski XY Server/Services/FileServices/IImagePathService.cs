@@ -6,6 +6,5 @@ namespace Karpinski_XY_Server.Services.FileServices
     {
         string ConstructPathForConversionTo64Base(T imageDto);
         string ConstructPathForDatabase(T imageDto);
-        string GetBaseUrlFromLaunchSettings();
     }
 }

@@ -53,10 +53,10 @@ namespace Karpinski_XY_Server.Services.FileServices
 
 
                 var imageBytes = Convert.FromBase64String(imageDto.File);
-                await File.WriteAllBytesAsync(newPath, imageBytes);
+                await File.WriteAllBytesAsync($".{newPath}", imageBytes);
 
-                imageDto.File = null; 
-                imageDto.ImagePath = $"{_imagePathService.GetBaseUrlFromLaunchSettings()}\\{newPath}";
+                imageDto.File = null;
+                imageDto.ImagePath = newPath;
                 _logger.LogInformation("Successfully updated image path for image: {FileName}", fileName);
 
                 return null;

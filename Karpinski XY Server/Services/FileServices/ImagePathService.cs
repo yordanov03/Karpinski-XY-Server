@@ -9,19 +9,19 @@ namespace Karpinski_XY_Server.Services.FileServices
 {
     public class ImagePathService<T> : IImagePathService<T> where T : ImageBaseDto
     {
-        private readonly IWebHostEnvironment _env;
+        //private readonly IWebHostEnvironment _env;
         private readonly ImageFiles _imageFiles;
 
-        public ImagePathService(IWebHostEnvironment env, IOptions<ImageFiles> imageFiles)
+        public ImagePathService(IOptions<ImageFiles> imageFiles)
         {
-            _env = env;
+            //_env = env;
             _imageFiles = imageFiles.Value;
         }
 
         public string ConstructPathForConversionTo64Base(T imageDto)
         {
-            var baseUrl = GetBaseUrlFromLaunchSettings();
-            var relativePath = imageDto.ImagePath.Replace(baseUrl, string.Empty);
+            //var baseUrl = GetBaseUrlFromLaunchSettings();
+            var relativePath = imageDto.ImagePath;
             var directory = GetFilesPath();
             var filePath = Path.Combine(directory, relativePath);
             var fullPath = $"{Directory.GetCurrentDirectory()}\\{filePath}";
@@ -31,28 +31,28 @@ namespace Karpinski_XY_Server.Services.FileServices
 
         public string ConstructPathForDatabase(T imageDto)
         {
-            var fileName = imageDto.FileName + ".jpg";
+            var fileName = imageDto.FileName;
             var directory = GetFilesPath();
-            var newPath = Path.Combine(directory.TrimStart('\\', '/'), fileName);
+            var newPath = Path.Combine(directory, fileName);
             return newPath;
         }
 
 
-        public string GetBaseUrlFromLaunchSettings()
-        {
-            var launchSettingsFilePath = Path.Combine(_env.ContentRootPath, "Properties", "launchSettings.json");
+        //public string GetBaseUrlFromLaunchSettings()
+        //{
+        //    var launchSettingsFilePath = Path.Combine(_env.ContentRootPath, "Properties", "launchSettings.json");
 
-            if (!File.Exists(launchSettingsFilePath))
-            {
-                return "launchSettings.json not found";
-            }
+        //    if (!File.Exists(launchSettingsFilePath))
+        //    {
+        //        return "launchSettings.json not found";
+        //    }
 
-            var launchSettings = JObject.Parse(File.ReadAllText(launchSettingsFilePath));
-            var applicationUrls = launchSettings["profiles"]["Karpinski_XY_Server"]["applicationUrl"].ToString();
-            var firstUrl = applicationUrls.Split(';')[0];
+        //    var launchSettings = JObject.Parse(File.ReadAllText(launchSettingsFilePath));
+        //    var applicationUrls = launchSettings["profiles"]["Karpinski_XY_Server"]["applicationUrl"].ToString();
+        //    var firstUrl = applicationUrls.Split(';')[0];
 
-            return firstUrl;
-        }
+        //    return firstUrl;
+        //}
 
         protected string GetFilesPath()
         {
