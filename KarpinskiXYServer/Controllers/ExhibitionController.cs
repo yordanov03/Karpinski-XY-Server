@@ -15,7 +15,7 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpPost]
-        //[Authorize]
+        [Authorize]
         [AllowAnonymous]
         [DisableRequestSizeLimit]
         [Route("", Name = "CreateExhibition")]
@@ -85,7 +85,7 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpPut]
-        //[Authorize]
+        [Authorize]
         [AllowAnonymous]
         [Route("", Name = "UpdateExhibition")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -103,7 +103,7 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpDelete]
-        //[Authorize]
+        [Authorize]
         [AllowAnonymous]
         [Route("{id}", Name = "DeleteExhibition")]
         [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
