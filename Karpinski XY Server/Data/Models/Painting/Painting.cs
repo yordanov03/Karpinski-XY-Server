@@ -1,8 +1,7 @@
-﻿using Karpinski_XY_Server.Data.Models;
-using Karpinski_XY_Server.Data.Models.Base;
+﻿using Karpinski_XY_Server.Data.Models.Base;
 using System.ComponentModel.DataAnnotations;
 
-namespace Karpinski_XY_Server.Models
+namespace Karpinski_XY_Server.Data.Models.Painting
 {
     public class Painting : DeletableEntity
     {
@@ -23,15 +22,13 @@ namespace Karpinski_XY_Server.Models
 
         public bool IsAvailableToSell { get; set; }
 
-        public string ShortDescription { get; set; }
-
         public string Technique { get; set; }
 
         public int Year { get; set; }
 
         public bool IsOnFocus { get; set; }
 
-        public List<Image> Images { get; set; } = new List<Image>();
+        public List<PaintingImage> PaintingImages { get; set; } = new List<PaintingImage>();
 
 
     }

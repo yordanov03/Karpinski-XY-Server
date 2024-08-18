@@ -22,7 +22,7 @@ namespace Karpinski_XY_Server.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("Karpinski_XY_Server.Data.Models.Image", b =>
+            modelBuilder.Entity("Karpinski_XY_Server.Data.Models.Exhibition.Exhibition", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -34,7 +34,63 @@ namespace Karpinski_XY_Server.Migrations
                     b.Property<DateTime?>("DeletedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("ImageUrl")
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Link")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LongDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("ModifiedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Organizer")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Exhibitions");
+                });
+
+            modelBuilder.Entity("Karpinski_XY_Server.Data.Models.Exhibition.ExhibitionImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("EntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImagePath")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -47,17 +103,14 @@ namespace Karpinski_XY_Server.Migrations
                     b.Property<DateTime?>("ModifiedOn")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("PaintingId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("PaintingId");
+                    b.HasIndex("EntityId");
 
-                    b.ToTable("Images");
+                    b.ToTable("ExhibitionImages");
                 });
 
-            modelBuilder.Entity("Karpinski_XY_Server.Models.Painting", b =>
+            modelBuilder.Entity("Karpinski_XY_Server.Data.Models.Painting.Painting", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -97,10 +150,6 @@ namespace Karpinski_XY_Server.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("ShortDescription")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Technique")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -111,6 +160,45 @@ namespace Karpinski_XY_Server.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Paintings");
+                });
+
+            modelBuilder.Entity("Karpinski_XY_Server.Data.Models.Painting.PaintingImage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("EntityId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImagePath")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsMainImage")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("ModifiedOn")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EntityId");
+
+                    b.ToTable("PaintingImages");
                 });
 
             modelBuilder.Entity("Karpinski_XY.Models.User", b =>
@@ -315,13 +403,22 @@ namespace Karpinski_XY_Server.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Karpinski_XY_Server.Data.Models.Image", b =>
+            modelBuilder.Entity("Karpinski_XY_Server.Data.Models.Exhibition.ExhibitionImage", b =>
                 {
-                    b.HasOne("Karpinski_XY_Server.Models.Painting", "Painting")
-                        .WithMany("Images")
-                        .HasForeignKey("PaintingId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("Karpinski_XY_Server.Data.Models.Exhibition.Exhibition", "Exhibition")
+                        .WithMany("ExhibitionImages")
+                        .HasForeignKey("EntityId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Exhibition");
+                });
+
+            modelBuilder.Entity("Karpinski_XY_Server.Data.Models.Painting.PaintingImage", b =>
+                {
+                    b.HasOne("Karpinski_XY_Server.Data.Models.Painting.Painting", "Painting")
+                        .WithMany("PaintingImages")
+                        .HasForeignKey("EntityId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Painting");
                 });
@@ -377,9 +474,14 @@ namespace Karpinski_XY_Server.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Karpinski_XY_Server.Models.Painting", b =>
+            modelBuilder.Entity("Karpinski_XY_Server.Data.Models.Exhibition.Exhibition", b =>
                 {
-                    b.Navigation("Images");
+                    b.Navigation("ExhibitionImages");
+                });
+
+            modelBuilder.Entity("Karpinski_XY_Server.Data.Models.Painting.Painting", b =>
+                {
+                    b.Navigation("PaintingImages");
                 });
 #pragma warning restore 612, 618
         }

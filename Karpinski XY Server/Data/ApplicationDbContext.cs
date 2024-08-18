@@ -1,7 +1,7 @@
 ﻿using Karpinski_XY.Models;
-using Karpinski_XY_Server.Data.Models;
 using Karpinski_XY_Server.Data.Models.Base;
-using Karpinski_XY_Server.Models;
+using Karpinski_XY_Server.Data.Models.Exhibition;
+using Karpinski_XY_Server.Data.Models.Painting;
 using Karpinski_XY_Server.Services.Contracts;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -20,17 +20,26 @@ namespace Karpinski_XY.Data
         }
 
         public DbSet<Painting> Paintings { get; set; }
-        public DbSet<Image> Images { get; set; }
+        public DbSet<PaintingImage> PaintingImages { get; set; }
+
+        public DbSet<Exhibition> Exhibitions { get; set; }
+        public DbSet<ExhibitionImage> ExhibitionImages { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
             builder.Entity<Painting>()
-            .HasMany(p => p.Images)
-            .WithOne(pp => pp.Painting)
-            .HasForeignKey(pp => pp.PaintingId)
+            .HasMany(p => p.PaintingImages)
+            .WithOne(pi => pi.Painting)
+            .HasForeignKey(pi => pi.EntityId)
             .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<Exhibition>()
+                .HasMany(e => e.ExhibitionImages)
+                .WithOne(ei => ei.Exhibition)
+                .HasForeignKey(ei => ei.EntityId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
 
         public override int SaveChanges(bool acceptAllChangesOnSuccess)

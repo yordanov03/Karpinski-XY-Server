@@ -1,11 +1,11 @@
 ﻿using Karpinski_XY_Server.Data.Models.Base;
-using Karpinski_XY_Server.Dtos;
+using Karpinski_XY_Server.Dtos.Painting;
 
 namespace Karpinski_XY_Server.Services.Contracts
 {
     public interface IPaintingsService
     {
-        public Task<Result<IEnumerable<PaintingDto>>> GetAllPaintings();
+        public Task<Result<IEnumerable<PaintingDto>>> GetAllPaintingsToSell();
         public Task<Result<IEnumerable<PaintingDto>>> GetAvailablePaintings();
         public Task<Result<IEnumerable<PaintingDto>>> GetPaintingsOnFocus();
         public Task<Result<IEnumerable<PaintingDto>>> GetPortfolioPaintings();

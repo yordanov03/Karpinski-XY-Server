@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using Karpinski_XY_Server.Dtos;
+using Karpinski_XY_Server.Dtos.Painting;
 
 public class PaintingDtoValidator : AbstractValidator<PaintingDto>
 {
@@ -18,8 +18,8 @@ public class PaintingDtoValidator : AbstractValidator<PaintingDto>
         RuleFor(p => p.Description)
             .NotEmpty().WithMessage("Description is required.");
 
-        RuleFor(p => p.Images)
-            .Must(list => list != null && list.Any()).WithMessage("At least one painting picture must be provided.");
+        RuleFor(p => p.PaintingImages)
+            .Must(list => list != null && list.Any()).WithMessage("At least one painting image must be provided.");
 
     }
 }

@@ -3,9 +3,9 @@ using Karpinski_XY_Server.Dtos;
 
 namespace Karpinski_XY_Server.Infrastructure.Validators
 {
-    public class ContactValidator : AbstractValidator<ContactDto>
+    public class ContactDtoValidator : AbstractValidator<ContactDto>
     {
-        public ContactValidator()
+        public ContactDtoValidator()
         {
             RuleFor(contact => contact.Name)
                 .NotEmpty()

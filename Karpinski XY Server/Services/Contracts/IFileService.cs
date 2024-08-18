@@ -1,13 +1,12 @@
-﻿using Karpinski_XY_Server.Data.Models;
-using Karpinski_XY_Server.Data.Models.Base;
-using Karpinski_XY_Server.Dtos;
+﻿using Karpinski_XY_Server.Data.Models.Base;
+using Karpinski_XY_Server.Dtos.BaseDto;
 
 namespace Karpinski_XY_Server.Services.Contracts
 {
-    public interface IFileService
+    public interface IFileService<T> where T : ImageBaseDto
     {
-        Task<Result<List<ImageDto>>> UpdateImagePathsAsync(List<ImageDto> images);
-        Task<Result<List<ImageDto>>> ConvertImagePathsToBase64Async(List<ImageDto> imageDtos);
-        void MarkDeletedImagesAsDeleted(List<ImageDto> imageDtos, List<Image> images);
+        Task<Result<List<T>>> UpdateImagePathsAsync(List<T> images);
+        Task<Result<List<T>>> ConvertImagePathsToBase64Async(List<T> imageDtos);
+        void MarkDeletedImagesAsDeleted(List<T> imageDtos, List<ImageBase> images);
     }
 }

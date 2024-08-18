@@ -1,21 +1,22 @@
-﻿using Karpinski_XY_Server.Dtos;
+﻿using Karpinski_XY_Server.Dtos.Painting;
 using Karpinski_XY_Server.Services.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Karpinski_XY_Server.Controllers
 {
-    public class PaintingsController : ApiController
+    public class PaintingController : ApiController
     {
         private readonly IPaintingsService _paintingsService;
 
-        public PaintingsController(IPaintingsService paintingsService)
+        public PaintingController(IPaintingsService paintingsService)
         {
             _paintingsService = paintingsService;
         }
 
         [HttpPost]
-        [Authorize]
+        //[Authorize]
+        [AllowAnonymous]
         [DisableRequestSizeLimit]
         [Route("", Name = "create")]
         [ProducesResponseType(StatusCodes.Status200OK)]
@@ -33,7 +34,8 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpGet]
-        [Authorize]
+        //[Authorize]
+        [AllowAnonymous]
         [Route("toEdit/{id}", Name = "getPaintingToEdit")]
         [ProducesResponseType(typeof(PaintingDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -49,7 +51,8 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpPut]
-        [Authorize]
+        //[Authorize]
+        [AllowAnonymous]
         [Route("", Name = "update")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -135,6 +138,22 @@ namespace Karpinski_XY_Server.Controllers
         public async Task<IActionResult> GetPaintingsOnFocus()
         {
             var result = await _paintingsService.GetPaintingsOnFocus();
+            if (result.Succeeded)
+            {
+                return Ok(result.Value);
+            }
+
+            return BadRequest(result.Errors);
+        }
+
+        [HttpGet]
+        [AllowAnonymous]
+        [Route("toSell", Name = "toSell")]
+        [ProducesResponseType(typeof(IEnumerable<PaintingDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetAllPaintingsToSell()
+        {
+            var result = await _paintingsService.GetAllPaintingsToSell();
             if (result.Succeeded)
             {
                 return Ok(result.Value);

@@ -2,6 +2,9 @@
 using Karpinski_XY.Data;
 using Karpinski_XY.Models;
 using Karpinski_XY_Server.Data.Models.Configuration;
+using Karpinski_XY_Server.Dtos.Exhibition;
+using Karpinski_XY_Server.Dtos.Painting;
+using Karpinski_XY_Server.Services.FileServices;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -72,9 +75,15 @@ namespace Karpinski_XY.Infrastructure.Extensions
                     .Configure<MailchimpSettings>(configuration.GetSection("Mailchimp"));
 
         public static void AddApplicationServices(this IServiceCollection services)
-             => services.RegisterAssemblyPublicNonGenericClasses()
+        {
+            services.AddScoped<IImagePathService<ExhibitionImageDto>, ImagePathService<ExhibitionImageDto>>();
+            services.AddScoped<IImagePathService<PaintingImageDto>, ImagePathService<PaintingImageDto>>();
+
+            services.RegisterAssemblyPublicNonGenericClasses()
                     .Where(c => c.Name.EndsWith("Service"))
                     .AsPublicImplementedInterfaces(ServiceLifetime.Scoped);
+        }
+
         public static IServiceCollection AddApplicationValidators(this IServiceCollection services)
         {
             services.Scan(scan => scan
