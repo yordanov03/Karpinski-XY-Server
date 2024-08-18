@@ -15,7 +15,7 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpPost]
-        //[Authorize]
+        [Authorize]
         [AllowAnonymous]
         [DisableRequestSizeLimit]
         [Route("", Name = "create")]
@@ -34,7 +34,7 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpGet]
-        //[Authorize]
+        [Authorize]
         [AllowAnonymous]
         [Route("toEdit/{id}", Name = "getPaintingToEdit")]
         [ProducesResponseType(typeof(PaintingDto), StatusCodes.Status200OK)]
@@ -51,7 +51,7 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpPut]
-        //[Authorize]
+        [Authorize]
         [AllowAnonymous]
         [Route("", Name = "update")]
         [ProducesResponseType(StatusCodes.Status200OK)]
