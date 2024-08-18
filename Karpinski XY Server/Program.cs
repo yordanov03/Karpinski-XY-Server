@@ -1,4 +1,3 @@
-using Karpinski_XY;
 using Karpinski_XY.Infrastructure.Extensions;
 using Karpinski_XY_Server.Infrastructure.MIddlewares;
 using Microsoft.AspNetCore.Http.Features;
