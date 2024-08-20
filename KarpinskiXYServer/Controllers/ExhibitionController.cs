@@ -51,8 +51,7 @@ namespace Karpinski_XY_Server.Controllers
         }
 
         [HttpGet]
-        //[Authorize]
-        [AllowAnonymous]
+        [Authorize]
         [Route("toEdit/{id}", Name = "GetExhibitionToEdit")]
         [ProducesResponseType(typeof(ExhibitionDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -72,6 +71,7 @@ namespace Karpinski_XY_Server.Controllers
         [Route("", Name = "GetAllExhibitions")]
         [ProducesResponseType(typeof(IEnumerable<ExhibitionDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ResponseCache(Duration = 1800, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> GetAllExhibitions()
         {
             var result = await _exhibitionService.GetAllExhibitions();
