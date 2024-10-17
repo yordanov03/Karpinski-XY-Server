@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Karpinski_XY_Server.Controllers
 {
-    public class PaintingController : ApiController
+    public class PaintingsController : ApiController
     {
         private readonly IPaintingsService _paintingsService;
 
-        public PaintingController(IPaintingsService paintingsService)
+        public PaintingsController(IPaintingsService paintingsService)
         {
             _paintingsService = paintingsService;
         }

@@ -18,6 +18,13 @@ public class JwtMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
+        // Allow preflight requests without checking for authentication
+        if (context.Request.Method == HttpMethods.Options)
+        {
+            await _next(context);
+            return;
+        }
+
         if (!ShouldSkipAuthorization(context))
         {
             var authHeader = context.Request.Headers["Authorization"].ToString();
@@ -40,6 +47,7 @@ public class JwtMiddleware
 
         await _next(context);
     }
+
 
     private bool ValidateToken(string token)
     {

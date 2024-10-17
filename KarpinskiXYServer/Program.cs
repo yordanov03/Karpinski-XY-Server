@@ -51,7 +51,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Karpinski");
+        c.SwaggerEndpoint("swagger/v1/swagger.json", "Karpinski");
         c.RoutePrefix = String.Empty;
     });
 }
@@ -65,7 +65,7 @@ app.UseCors(options => options
 
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
-app.UseMiddleware<JwtMiddleware>();
+//app.UseMiddleware<JwtMiddleware>();
 app.UseHttpMethodOverride();
 app.UseStaticFiles();
 

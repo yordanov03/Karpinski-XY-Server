@@ -5,11 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Karpinski_XY_Server.Controllers
 {
-    public class ExhibitionController : ApiController
+    public class ExhibitionsController : ApiController
     {
        private IExhibitionService _exhibitionService;
 
-        public ExhibitionController(IExhibitionService exhibitionService)
+        public ExhibitionsController(IExhibitionService exhibitionService)
         {
             this._exhibitionService = exhibitionService;
         }
