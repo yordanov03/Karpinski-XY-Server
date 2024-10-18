@@ -3,7 +3,7 @@
 namespace Karpinski_XY_Server.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     [Produces("application/json")]
     public abstract class ApiController : ControllerBase
     {

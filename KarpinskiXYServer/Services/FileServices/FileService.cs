@@ -48,7 +48,12 @@ namespace Karpinski_XY_Server.Services.FileServices
             try
             {
                 imageDto.Id = Guid.NewGuid();
-                var fileName = imageDto.FileName + ".jpg";
+                var lastDotIndex = imageDto.FileName.LastIndexOf('.');
+                var baseFileName = lastDotIndex >= 0 ? imageDto.FileName.Substring(0, lastDotIndex) : imageDto.FileName;
+                var fileName = baseFileName + ".jpg";
+
+                // Construct the new path for the file using the updated file name
+                imageDto.FileName = fileName;
                 var newPath =_imagePathService.ConstructPathForDatabase(imageDto);
 
 
