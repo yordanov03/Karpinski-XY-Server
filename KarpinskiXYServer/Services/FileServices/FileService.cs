@@ -23,6 +23,11 @@ namespace Karpinski_XY_Server.Services.FileServices
 
             var errors = new List<string>();
 
+            if(!imageDtos.Any(i => i.IsMainImage))
+            {
+                imageDtos.First().IsMainImage = true;
+            }
+
             foreach (var imageDto in imageDtos)
             {
                 var error = await UpdateImagePathAsync(imageDto);
