@@ -1,6 +1,4 @@
-﻿using Karpinski_XY_Server.Data.Models;
-
-namespace Karpinski_XY_Server.Dtos.Painting
+﻿namespace Karpinski_XY_Server.Dtos.Painting
 {
     public class PaintingDto
     {

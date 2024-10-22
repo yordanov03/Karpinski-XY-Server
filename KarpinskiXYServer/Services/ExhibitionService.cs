@@ -93,6 +93,7 @@ namespace Karpinski_XY_Server.Services
                     .Include(e => e.ExhibitionImages
                     .Where(e => e.IsMainImage))
                     .Where(e => !e.IsDeleted)
+                    .OrderByDescending(e => e.StartDate)
                 .ToListAsync();
             var mapped = _mapper.Map<IEnumerable<ExhibitionDto>>(exhibitions);
 

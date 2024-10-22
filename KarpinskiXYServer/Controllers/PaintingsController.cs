@@ -87,7 +87,7 @@ namespace Karpinski_XY_Server.Controllers
         [AllowAnonymous]
         [Route("portfolio", Name = "portfolio")]
         [ProducesResponseType(typeof(IEnumerable<PaintingDto>), StatusCodes.Status200OK)]
-        [ResponseCache(Duration = 1800, Location = ResponseCacheLocation.Any)]
+        //[ResponseCache(Duration = 600, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> GetPortfolioPaintings()
         {
             var result = await _paintingsService.GetPortfolioPaintings();
@@ -103,7 +103,7 @@ namespace Karpinski_XY_Server.Controllers
         [AllowAnonymous]
         [Route("available", Name = "available")]
         [ProducesResponseType(typeof(IEnumerable<PaintingDto>), StatusCodes.Status200OK)]
-        [ResponseCache(Duration = 1800, Location = ResponseCacheLocation.Any)]
+        //[ResponseCache(Duration = 600, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> GetAvailablePaintings()
         {
             var result = await _paintingsService.GetAvailablePaintings();
@@ -121,7 +121,7 @@ namespace Karpinski_XY_Server.Controllers
         [Route("{id}", Name = "loadPainting")]
         [ProducesResponseType(typeof(PaintingDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ResponseCache(Duration = 1800, Location = ResponseCacheLocation.Any)]
+        //[ResponseCache(Duration = 600, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> GetPainting(Guid id)
         {
             var result = await _paintingsService.GetPaintingById(id);
@@ -138,7 +138,7 @@ namespace Karpinski_XY_Server.Controllers
         [Route("", Name = "onFocus")]
         [ProducesResponseType(typeof(IEnumerable<PaintingDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ResponseCache(Duration = 1800, Location = ResponseCacheLocation.Any)]
+        //[ResponseCache(Duration = 600, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> GetPaintingsOnFocus()
         {
             var result = await _paintingsService.GetPaintingsOnFocus();
@@ -155,7 +155,7 @@ namespace Karpinski_XY_Server.Controllers
         [Route("toSell", Name = "toSell")]
         [ProducesResponseType(typeof(IEnumerable<PaintingDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ResponseCache(Duration = 1800, Location =ResponseCacheLocation.Any)]
+        //[ResponseCache(Duration = 600, Location =ResponseCacheLocation.Any)]
         public async Task<IActionResult> GetAllPaintingsToSell()
         {
             var result = await _paintingsService.GetAllPaintingsToSell();

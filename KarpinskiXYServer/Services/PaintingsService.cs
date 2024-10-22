@@ -106,15 +106,20 @@ namespace Karpinski_XY_Server.Services
             }
 
             this._fileService.MarkDeletedImagesAsDeleted(model.PaintingImages, painting.PaintingImages.Cast<ImageBase>().ToList());
+
             _context.Update(painting);
+            await _context.SaveChangesAsync();
+
+            _mapper.Map(model, painting);
 
             var imagesWithoutPath = model.PaintingImages.Where(i => string.IsNullOrEmpty(i.ImagePath)).ToList();
             if (imagesWithoutPath.Any())
             {
                 await _fileService.UpdateImagePathsAsync(imagesWithoutPath);
+                var imagesWithPathsToAddToColletion = _mapper.Map<List<PaintingImage>>(imagesWithoutPath);
+                painting.PaintingImages.AddRange(imagesWithPathsToAddToColletion);
             }
 
-            _mapper.Map(model, painting);
             _context.Update(painting);
             await _context.SaveChangesAsync();
 
