@@ -1,5 +1,4 @@
 ﻿using Karpinski_XY.Data;
-using Microsoft.EntityFrameworkCore;
 
 namespace Karpinski_XY.Infrastructure.Extensions
 {

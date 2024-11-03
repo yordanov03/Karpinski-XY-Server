@@ -65,7 +65,7 @@ namespace Karpinski_XY_Server.Services
         {
             _logger.LogInformation($"Fetching painting with id {id} to edit");
 
-            var painting = FindPaintingById(id);
+            var painting = await FindPaintingById(id);
             if (painting == null)
             {
                 return Result<PaintingDto>.Fail($"Painting with ID {id} not found.");
@@ -84,7 +84,6 @@ namespace Karpinski_XY_Server.Services
 
             return Result<PaintingDto>.Success(paintingDto);
         }
-
         public async Task<Result<PaintingDto>> Update(PaintingDto model)
         {
             var validationResult = _paintingValidator.Validate(model);
@@ -98,35 +97,28 @@ namespace Karpinski_XY_Server.Services
 
             _logger.LogInformation($"Looking to update painting with id {model.Id}");
 
-            var painting = FindPaintingById(model.Id);
+            var painting = await FindPaintingById(model.Id);
             if (painting == null)
             {
                 _logger.LogWarning($"Painting with ID {model.Id} not found.");
                 return Result<PaintingDto>.Fail("Painting not found.");
             }
 
-            this._fileService.MarkDeletedImagesAsDeleted(model.PaintingImages, painting.PaintingImages.Cast<ImageBase>().ToList());
-            _context.Update(painting);
-
-            var imagesWithoutPath = model.PaintingImages.Where(i => string.IsNullOrEmpty(i.ImagePath)).ToList();
-            if (imagesWithoutPath.Any())
-            {
-                await _fileService.UpdateImagePathsAsync(imagesWithoutPath);
-            }
-
-            _mapper.Map(model, painting);
+            painting.PaintingImages.ForEach(i => i.IsDeleted = true);
+            _context.UpdateRange(painting.PaintingImages);
+            painting.IsDeleted = true;
             _context.Update(painting);
             await _context.SaveChangesAsync();
-
-            _logger.LogInformation($"Updated painting successfully");
+            await Create(model);
             return Result<PaintingDto>.Success(model);
         }
+    
 
         public async Task<Result<bool>> Delete(Guid id)
         {
             _logger.LogInformation($"Deleting painting with {id}");
 
-            var painting = FindPaintingById(id);
+            var painting = await FindPaintingById(id);
             if (painting == null)
             {
                 _logger.LogWarning($"Painting with ID {id} not found.");
@@ -173,7 +165,7 @@ namespace Karpinski_XY_Server.Services
         {
             _logger.LogInformation($"Fetching painting with id {id}");
 
-            var painting = FindPaintingById(id);
+            var painting = await FindPaintingById(id);
             if (painting == null)
             {
                 return Result<PaintingDto>.Fail($"Painting with ID {id} not found.");
@@ -213,13 +205,13 @@ namespace Karpinski_XY_Server.Services
         }
 
 
-        private Painting FindPaintingById(Guid id)
-        => _context
-            .Paintings
-            .Include(p=>p.PaintingImages
-                .Where(i=>!i.IsDeleted)
-                .OrderBy(i=>!i.IsMainImage))
-            .Where(p => p.Id == id)
-            .FirstOrDefault();
+        private async Task<Painting> FindPaintingById(Guid id)
+        => await _context
+        .Paintings
+            .AsNoTracking()
+        .Include(p => p.PaintingImages
+            .Where(i => !i.IsDeleted)
+            .OrderByDescending(i => i.IsMainImage)) // Ensures main image comes first
+        .FirstOrDefaultAsync(p => p.Id == id);
     }
 }

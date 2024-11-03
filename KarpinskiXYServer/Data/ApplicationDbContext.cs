@@ -25,6 +25,7 @@ namespace Karpinski_XY.Data
         public DbSet<Exhibition> Exhibitions { get; set; }
         public DbSet<ExhibitionImage> ExhibitionImages { get; set; }
 
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -33,7 +34,7 @@ namespace Karpinski_XY.Data
             .HasMany(p => p.PaintingImages)
             .WithOne(pi => pi.Painting)
             .HasForeignKey(pi => pi.EntityId)
-            .OnDelete(DeleteBehavior.Cascade);
+            .OnDelete(DeleteBehavior.SetNull);
 
             builder.Entity<Exhibition>()
                 .HasMany(e => e.ExhibitionImages)
