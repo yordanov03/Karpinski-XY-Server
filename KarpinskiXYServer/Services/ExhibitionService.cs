@@ -3,7 +3,6 @@ using FluentValidation;
 using Karpinski_XY.Data;
 using Karpinski_XY_Server.Data.Models.Base;
 using Karpinski_XY_Server.Data.Models.Exhibition;
-using Karpinski_XY_Server.Data.Models.Painting;
 using Karpinski_XY_Server.Dtos.Exhibition;
 using Karpinski_XY_Server.Services.Contracts;
 using Microsoft.EntityFrameworkCore;
@@ -17,18 +16,25 @@ namespace Karpinski_XY_Server.Services
         private readonly IMapper _mapper;
         private readonly ILogger<ExhibitionService> _logger;
         private readonly IFileService<ExhibitionImageDto> _fileService;
+        private readonly ICacheService _cacheService;
 
-        public ExhibitionService(ApplicationDbContext context,
+        private const string AllExhibitionsCacheKey = "AllExhibitions";
+        private static string GetExhibitionByIdCacheKey(Guid id) => $"Exhibition_{id}";
+
+        public ExhibitionService(
+            ApplicationDbContext context,
                                   IValidator<ExhibitionDto> exhibitionValidator,
                                   IMapper mapper,
                                   ILogger<ExhibitionService> logger,
-                                  IFileService<ExhibitionImageDto> fileService)
+                                  IFileService<ExhibitionImageDto> fileService,
+                                  ICacheService cacheService)
         {
             _context = context;
             _exhibitionValidator = exhibitionValidator;
             _mapper = mapper;
             _logger = logger;
             _fileService = fileService;
+            _cacheService = cacheService;
         }
 
         public async Task<Result<Guid>> CreateExhibition(ExhibitionDto model)
@@ -59,6 +65,7 @@ namespace Karpinski_XY_Server.Services
             _context.Add(exhibition);
             await _context.SaveChangesAsync();
 
+            _cacheService.Remove(AllExhibitionsCacheKey);
             _logger.LogInformation("Successfully created a new exhibition");
             return Result<Guid>.Success(model.Id);
         }
@@ -79,24 +86,38 @@ namespace Karpinski_XY_Server.Services
             _context.Update(exhibition);
             await _context.SaveChangesAsync();
 
+            _cacheService.Remove(GetExhibitionByIdCacheKey(id));
+            _cacheService.Remove(AllExhibitionsCacheKey);
             _logger.LogInformation("Exhibition deleted successfully");
             return Result<bool>.Success(true);
         }
-
 
         public async Task<Result<IEnumerable<ExhibitionDto>>> GetAllExhibitions()
         {
             _logger.LogInformation("Fetching all exhibitions");
 
-            var exhibitions = await _context
-                .Exhibitions
-                    .Include(e => e.ExhibitionImages
-                    .Where(e => e.IsMainImage))
-                    .Where(e => !e.IsDeleted)
-                .ToListAsync();
-            var mapped = _mapper.Map<IEnumerable<ExhibitionDto>>(exhibitions);
+            var cachedExhibitions = _cacheService.Get<IEnumerable<ExhibitionDto>>(AllExhibitionsCacheKey);
 
-            return Result<IEnumerable<ExhibitionDto>>.Success(mapped);
+            if (cachedExhibitions == null)
+            {
+                var exhibitions = await _context
+                    .Exhibitions
+                        .Include(e => e.ExhibitionImages
+                        .Where(e => e.IsMainImage))
+                        .Where(e => !e.IsDeleted)
+                    .ToListAsync();
+
+                cachedExhibitions = _mapper.Map<IEnumerable<ExhibitionDto>>(exhibitions);
+
+                _cacheService.Set(AllExhibitionsCacheKey, cachedExhibitions);
+                _logger.LogInformation("Exhibitions fetched from the database and cached.");
+            }
+            else
+            {
+                _logger.LogInformation("Exhibitions fetched from the cache.");
+            }
+
+            return Result<IEnumerable<ExhibitionDto>>.Success(cachedExhibitions);
         }
 
 
@@ -165,6 +186,9 @@ namespace Karpinski_XY_Server.Services
             await _context.SaveChangesAsync();
 
             await CreateExhibition(model);
+
+            _cacheService.Remove(GetExhibitionByIdCacheKey(model.Id));
+            _cacheService.Remove(AllExhibitionsCacheKey);
 
             _logger.LogInformation("Exhibition updated successfully");
             return Result<ExhibitionDto>.Success(model);

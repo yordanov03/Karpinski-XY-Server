@@ -15,9 +15,10 @@ builder.Services
     .AddAutoMapperConfiguration()
     .AddLogging()
     .AddSerilog()
+    .AddMemoryCache()
     .AddSwaggerGen(c =>
     {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Karpinski", Version="v1"});
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "Karpinski", Version = "v1" });
         c.CustomSchemaIds(Karpinski_XY.Infrastructure.Extensions.ServiceCollectionExtensions.SchemaSuffixStrategy);
     })
     .AddApplicationValidators()
