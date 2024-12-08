@@ -158,18 +158,13 @@ namespace Karpinski_XY_Server.Services
                 return Result<ExhibitionDto>.Fail("Exhibition not found.");
             }
 
-            this._fileService.MarkDeletedImagesAsDeleted(model.ExhibitionImages, exhibition.ExhibitionImages.Cast<ImageBase>().ToList());
-            _context.Update(exhibition);
-
-            var imagesWithoutPath = model.ExhibitionImages.Where(i => string.IsNullOrEmpty(i.ImagePath)).ToList();
-            if (imagesWithoutPath.Any())
-            {
-                await _fileService.UpdateImagePathsAsync(imagesWithoutPath);
-            }
-
-            _mapper.Map(model, exhibition);
+            exhibition.ExhibitionImages.ForEach(i => i.IsDeleted = true);
+            _context.UpdateRange(exhibition.ExhibitionImages);
+            exhibition.IsDeleted = true;
             _context.Update(exhibition);
             await _context.SaveChangesAsync();
+
+            await CreateExhibition(model);
 
             _logger.LogInformation("Exhibition updated successfully");
             return Result<ExhibitionDto>.Success(model);
