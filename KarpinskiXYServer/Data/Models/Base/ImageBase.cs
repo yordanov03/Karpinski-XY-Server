@@ -8,7 +8,6 @@ namespace Karpinski_XY_Server.Data.Models.Base
 
         public string ImagePath { get; set; }
 
-        [Required]
         public bool IsMainImage { get; set; }
 
         public Guid? EntityId { get; set; }

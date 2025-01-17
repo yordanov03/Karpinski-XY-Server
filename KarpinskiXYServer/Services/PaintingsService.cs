@@ -42,6 +42,11 @@ namespace Karpinski_XY_Server.Services
 
         public async Task<Result<Guid>> Create(PaintingDto model)
         {
+            if (await PaintingExists(model.Name))
+            {
+                return Result<Guid>.Fail("Painting with that name already exists");
+            }
+
             var validationResult = _paintingValidator.Validate(model);
 
             if (!validationResult.IsValid)
@@ -68,12 +73,12 @@ namespace Karpinski_XY_Server.Services
             await _context.SaveChangesAsync();
 
             _cacheService.RemoveAll(new[]
-   {
-        AllPaintingsToSellCacheKey,
-        AvailablePaintingsCacheKey,
-        PortfolioPaintingsCacheKey,
-        PaintingsOnFocusCacheKey
-    });
+             {
+                AllPaintingsToSellCacheKey,
+                AvailablePaintingsCacheKey,
+                PortfolioPaintingsCacheKey,
+                PaintingsOnFocusCacheKey
+            });
             _logger.LogInformation("Successfully created a new painting");
             return Result<Guid>.Success(model.Id);
         }
@@ -129,13 +134,13 @@ namespace Karpinski_XY_Server.Services
             await Create(model);
 
             _cacheService.RemoveAll(new[]
-   {
-        GetPaintingByIdCacheKey(model.Id),
-        AllPaintingsToSellCacheKey,
-        AvailablePaintingsCacheKey,
-        PortfolioPaintingsCacheKey,
-        PaintingsOnFocusCacheKey
-    });
+            {
+            GetPaintingByIdCacheKey(model.Id),
+            AllPaintingsToSellCacheKey,
+            AvailablePaintingsCacheKey,
+            PortfolioPaintingsCacheKey,
+            PaintingsOnFocusCacheKey
+            });
             return Result<PaintingDto>.Success(model);
         }
 
@@ -157,13 +162,13 @@ namespace Karpinski_XY_Server.Services
             await _context.SaveChangesAsync();
 
             _cacheService.RemoveAll(new[]
-    {
-        GetPaintingByIdCacheKey(id),
-        AllPaintingsToSellCacheKey,
-        AvailablePaintingsCacheKey,
-        PortfolioPaintingsCacheKey,
-        PaintingsOnFocusCacheKey
-    });
+            {
+                GetPaintingByIdCacheKey(id),
+                AllPaintingsToSellCacheKey,
+                AvailablePaintingsCacheKey,
+                PortfolioPaintingsCacheKey,
+                PaintingsOnFocusCacheKey
+            });
             _logger.LogInformation($"Deleted painting successfully");
             return Result<bool>.Success(true);
         }
@@ -299,11 +304,18 @@ namespace Karpinski_XY_Server.Services
 
         private async Task<Painting> FindPaintingById(Guid id)
         => await _context
-        .Paintings
-            .AsNoTracking()
-        .Include(p => p.PaintingImages
+            .Paintings.AsNoTracking()
+            .Include(p => p.PaintingImages
             .Where(i => !i.IsDeleted)
-            .OrderByDescending(i => i.IsMainImage)) // Ensures main image comes first
-        .FirstOrDefaultAsync(p => p.Id == id);
+            .OrderByDescending(i => i.IsMainImage))
+            .FirstOrDefaultAsync(p => p.Id == id);
+
+        private async Task<bool> PaintingExists(string name)
+        => await _context
+            .Paintings
+            .AsNoTracking()
+            .Where(i => !i.IsDeleted)
+            .AnyAsync(i => i.Name == name);
+
     }
 }

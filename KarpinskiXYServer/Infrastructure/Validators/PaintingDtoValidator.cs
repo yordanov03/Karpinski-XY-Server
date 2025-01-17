@@ -21,5 +21,8 @@ public class PaintingDtoValidator : AbstractValidator<PaintingDto>
         RuleFor(p => p.PaintingImages)
             .Must(list => list != null && list.Any()).WithMessage("At least one painting image must be provided.");
 
+        RuleFor(p => p.PaintingImages)
+        .Must(images => images != null && images.Any(image => image.IsMainImage)).WithMessage("At least one painting image must be marked as the main image.");
+
     }
 }

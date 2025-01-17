@@ -23,11 +23,11 @@ namespace Karpinski_XY_Server.Services
 
         public ExhibitionService(
             ApplicationDbContext context,
-                                  IValidator<ExhibitionDto> exhibitionValidator,
-                                  IMapper mapper,
-                                  ILogger<ExhibitionService> logger,
-                                  IFileService<ExhibitionImageDto> fileService,
-                                  ICacheService cacheService)
+            IValidator<ExhibitionDto> exhibitionValidator,
+            IMapper mapper,
+            ILogger<ExhibitionService> logger,
+            IFileService<ExhibitionImageDto> fileService,
+            ICacheService cacheService)
         {
             _context = context;
             _exhibitionValidator = exhibitionValidator;
@@ -39,6 +39,11 @@ namespace Karpinski_XY_Server.Services
 
         public async Task<Result<Guid>> CreateExhibition(ExhibitionDto model)
         {
+            if (await ExhibitionExists(model.Title))
+            {
+                return Result<Guid>.Fail("Exhibition with that name already exists");
+            }
+
             var validationResult = _exhibitionValidator.Validate(model);
 
             if (!validationResult.IsValid)
@@ -74,7 +79,7 @@ namespace Karpinski_XY_Server.Services
         {
             _logger.LogInformation($"Deleting exhibition with ID {id}");
 
-            var exhibition = FindExhibitionById(id);
+            var exhibition = await FindExhibitionById(id);
             if (exhibition == null)
             {
                 _logger.LogWarning($"Exhibition with ID {id} not found.");
@@ -172,7 +177,7 @@ namespace Karpinski_XY_Server.Services
 
             _logger.LogInformation($"Updating exhibition with id {model.Id}");
 
-            var exhibition = FindExhibitionById(model.Id);
+            var exhibition = await FindExhibitionById(model.Id);
             if (exhibition == null)
             {
                 _logger.LogWarning($"Exhibition with ID {model.Id} not found.");
@@ -194,13 +199,19 @@ namespace Karpinski_XY_Server.Services
             return Result<ExhibitionDto>.Success(model);
         }
 
-        private Exhibition FindExhibitionById(Guid id)
-        => _context
+        private async Task <Exhibition> FindExhibitionById(Guid id)
+        => await _context
              .Exhibitions
-                .Include(p => p.ExhibitionImages
-                .Where(i => !i.IsDeleted)
+             .Include(p => p.ExhibitionImages
+             .Where(i => !i.IsDeleted)
              .OrderBy(i => !i.IsMainImage))
-            .Where(p => p.Id == id)
-            .FirstOrDefault();
+             .Where(p => p.Id == id)
+             .FirstOrDefaultAsync();
+
+        private async Task<bool> ExhibitionExists(string title)
+        => await _context
+            .Exhibitions
+            .Where(i => !i.IsDeleted)
+            .AnyAsync(i => i.Title == title);
     }
 }

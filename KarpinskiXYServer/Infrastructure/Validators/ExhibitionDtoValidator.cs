@@ -14,6 +14,10 @@ namespace Karpinski_XY_Server.Infrastructure.Validators
             RuleFor(contact => contact.Location)
                 .NotEmpty()
                 .WithMessage("Location is required.");
+
+            RuleFor(p => p.ExhibitionImages)
+                .Must(images => images != null && images.Any(image => image.IsMainImage))
+                .WithMessage("At least one exhibition image must be marked as the main image.");
         }
     }
 }
