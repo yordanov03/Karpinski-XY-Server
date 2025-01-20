@@ -260,7 +260,6 @@ namespace Karpinski_XY_Server.Services
                     .Paintings
                     .Include(p => p.PaintingImages.OrderBy(i => !i.IsMainImage))
                     .Where(p => !p.IsAvailableToSell && !p.IsDeleted)
-                    .Take(6)
                     .ToListAsync();
 
                 cachedPaintings = _mapper.Map<IEnumerable<PaintingDto>>(paintings);

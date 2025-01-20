@@ -12,9 +12,15 @@
 
 
 	<ItemGroup>
-	  <Content Include="Resources\**\*">
-    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-  </Content>
+    <!-- Exclude the Paintings folder within Resources from publish -->
+    <Content Update="Resources\Images\**">
+      <ExcludeFromPublish>true</ExcludeFromPublish>
+    </Content>
+
+    <!-- Include other content in Resources -->
+    <Content Include="Resources\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <PackageReference Include="AutoMapper" Version="13.0.1" />
     <PackageReference Include="AutoMapper.Collection" Version="10.0.0" />
     <PackageReference Include="FluentValidation" Version="11.10.0" />

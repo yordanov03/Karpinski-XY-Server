@@ -130,7 +130,7 @@ namespace Karpinski_XY_Server.Services
         {
             _logger.LogInformation($"Fetching exhibition with ID {id}");
 
-            var exhibition = FindExhibitionById(id);
+            var exhibition = await FindExhibitionById(id);
             if (exhibition == null)
             {
                 return Result<ExhibitionDto>.Fail($"Exhibition with ID {id} not found.");
@@ -143,7 +143,7 @@ namespace Karpinski_XY_Server.Services
         {
             _logger.LogInformation($"Fetching exhibition with id {id} for update");
 
-            var exhibition = FindExhibitionById(id);
+            var exhibition = await FindExhibitionById(id);
             if (exhibition == null)
             {
                 return Result<ExhibitionDto>.Fail($"Exhibition with ID {id} not found.");

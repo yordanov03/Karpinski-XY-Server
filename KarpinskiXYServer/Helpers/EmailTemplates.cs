@@ -6,7 +6,9 @@ namespace Karpinski_XY_Server.Helpers
     {
         public static string RequestorConfirmationTemplate(ContactDto inquiry)
         {
-            string template = File.ReadAllText("..\\KarpinskiXYServer\\Resources\\EmailTemplates\\index.html");
+            string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string filePath = Path.Combine(baseDirectory, "resources", "emailtemplates", "index.html");
+            string template = File.ReadAllText(filePath);
             var replacedName = template.Replace("{{name}}", inquiry.Name);
             var replacedPhoneNumber = replacedName.Replace("{{phoneNumber}}", inquiry.PhoneNumber);
             var replacedContent = replacedPhoneNumber.Replace("{{content}}", inquiry.Content);

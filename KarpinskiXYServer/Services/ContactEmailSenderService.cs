@@ -4,7 +4,6 @@ using MimeKit;
 using System.Net.Mail;
 using FluentValidation;
 using Karpinski_XY_Server.Dtos;
-using Karpinski_XY_Server.Services.Contracts;
 using Karpinski_XY_Server.Data.Models.Configuration;
 using Karpinski_XY_Server.Helpers;
 using Karpinski_XY_Server.Data.Models.Base;
