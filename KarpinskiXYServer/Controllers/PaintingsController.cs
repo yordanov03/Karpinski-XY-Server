@@ -23,7 +23,7 @@ namespace Karpinski_XY_Server.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromBody]PaintingDto model)
         {
-            var result = await _paintingsService.Create(model);
+            var result = await _paintingsService.CreateAsync(model);
 
             if (result.Succeeded)
             {
@@ -41,7 +41,7 @@ namespace Karpinski_XY_Server.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetPaintingToEdit(Guid id)
         {
-            var result = await _paintingsService.GetPaintingToEdit(id);
+            var result = await _paintingsService.GetPaintingToEditAsync(id);
             if (result.Succeeded)
             {
                 return Ok(result.Value);
@@ -58,7 +58,7 @@ namespace Karpinski_XY_Server.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Update(PaintingDto model)
         {
-            var result = await _paintingsService.Update(model);
+            var result = await _paintingsService.UpdateAsync(model);
             if (result.Succeeded)
             {
                 return Ok(result.Value);
@@ -74,7 +74,7 @@ namespace Karpinski_XY_Server.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var result = await _paintingsService.Delete(id);
+            var result = await _paintingsService.DeleteAsync(id);
             if (result.Succeeded)
             {
                 return Ok(result.Value);
@@ -90,7 +90,7 @@ namespace Karpinski_XY_Server.Controllers
         //[ResponseCache(Duration = 1800, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> GetPortfolioPaintings()
         {
-            var result = await _paintingsService.GetPortfolioPaintings();
+            var result = await _paintingsService.GetPortfolioPaintingsAsync();
             if (result.Succeeded)
             {
                 return Ok(result.Value);
@@ -106,7 +106,7 @@ namespace Karpinski_XY_Server.Controllers
         //[ResponseCache(Duration = 1800, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> GetAvailablePaintings()
         {
-            var result = await _paintingsService.GetAvailablePaintings();
+            var result = await _paintingsService.GetAvailablePaintingsAsync();
             if (result.Succeeded)
             {
                 return Ok(result.Value);
@@ -124,7 +124,7 @@ namespace Karpinski_XY_Server.Controllers
         //[ResponseCache(Duration = 1800, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> GetPainting(Guid id)
         {
-            var result = await _paintingsService.GetPaintingById(id);
+            var result = await _paintingsService.GetPaintingByIdAsync(id);
             if (result.Succeeded)
             {
                 return Ok(result.Value);
@@ -141,7 +141,7 @@ namespace Karpinski_XY_Server.Controllers
         //[ResponseCache(Duration = 1800, Location = ResponseCacheLocation.Any)]
         public async Task<IActionResult> GetPaintingsOnFocus()
         {
-            var result = await _paintingsService.GetPaintingsOnFocus();
+            var result = await _paintingsService.GetPaintingsOnFocusAsync();
             if (result.Succeeded)
             {
                 return Ok(result.Value);
@@ -158,7 +158,7 @@ namespace Karpinski_XY_Server.Controllers
         //[ResponseCache(Duration = 1800, Location =ResponseCacheLocation.Any)]
         public async Task<IActionResult> GetAllPaintingsToSell()
         {
-            var result = await _paintingsService.GetAllPaintingsToSell();
+            var result = await _paintingsService.GetAllPaintingsToSellAsync();
             if (result.Succeeded)
             {
                 return Ok(result.Value);

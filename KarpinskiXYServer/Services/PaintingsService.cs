@@ -1,12 +1,10 @@
 ﻿using AutoMapper;
 using FluentValidation;
-using Karpinski_XY.Data;
+using Karpinski_XY_Server.Data;
 using Karpinski_XY_Server.Data.Models.Base;
 using Karpinski_XY_Server.Data.Models.Painting;
 using Karpinski_XY_Server.Dtos.Painting;
 using Karpinski_XY_Server.Services.Contracts;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace Karpinski_XY_Server.Services
 {
@@ -18,7 +16,7 @@ namespace Karpinski_XY_Server.Services
         private const string PaintingsOnFocusCacheKey = "PaintingsOnFocus";
 
         private readonly ICacheService _cacheService;
-        private readonly ApplicationDbContext _context;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IValidator<PaintingDto> _paintingValidator;
         private readonly IMapper _mapper;
         private readonly IFileService<PaintingImageDto> _fileService;
@@ -26,38 +24,36 @@ namespace Karpinski_XY_Server.Services
 
         public PaintingsService(
             ICacheService cacheService,
-            ApplicationDbContext context,
+            IUnitOfWork unitOfWork,
             IValidator<PaintingDto> paintingValidator,
             IMapper mapper,
             IFileService<PaintingImageDto> fileService,
             ILogger<PaintingsService> logger)
         {
             _cacheService = cacheService;
-            _context = context;
+            _unitOfWork = unitOfWork;
             _paintingValidator = paintingValidator;
             _mapper = mapper;
             _fileService = fileService;
             _logger = logger;
         }
 
-        public async Task<Result<Guid>> Create(PaintingDto model)
+        public async Task<Result<Guid>> CreateAsync(PaintingDto model)
         {
-            if (await PaintingExists(model.Name))
+            if (await _unitOfWork.Paintings.ExistsAsync(model.Name))
             {
                 return Result<Guid>.Fail("Painting with that name already exists");
             }
 
             var validationResult = _paintingValidator.Validate(model);
-
             if (!validationResult.IsValid)
             {
                 var errorMessages = validationResult.Errors.Select(e => e.ErrorMessage);
                 _logger.LogError("Validation failed for inquiry. Errors: {ValidationErrors}", string.Join(", ", errorMessages));
-                return Result<Guid>.Fail(validationResult.Errors.Select(e => e.ErrorMessage));
+                return Result<Guid>.Fail(errorMessages);
             }
 
             _logger.LogInformation("Creating a new painting");
-
             model.Id = Guid.NewGuid();
             var updateResult = await _fileService.UpdateImagePathsAsync(model.PaintingImages);
 
@@ -67,27 +63,28 @@ namespace Karpinski_XY_Server.Services
             }
 
             model.PaintingImages = updateResult.Value;
-
             var painting = _mapper.Map<Painting>(model);
-            _context.Add(painting);
-            await _context.SaveChangesAsync();
+
+            await _unitOfWork.Paintings.AddAsync(painting);
+            await _unitOfWork.CommitAsync();
 
             _cacheService.RemoveAll(new[]
-             {
+            {
                 AllPaintingsToSellCacheKey,
                 AvailablePaintingsCacheKey,
                 PortfolioPaintingsCacheKey,
                 PaintingsOnFocusCacheKey
             });
+
             _logger.LogInformation("Successfully created a new painting");
             return Result<Guid>.Success(model.Id);
         }
 
-        public async Task<Result<PaintingDto>> GetPaintingToEdit(Guid id)
+        public async Task<Result<PaintingDto>> GetPaintingToEditAsync(Guid id)
         {
             _logger.LogInformation($"Fetching painting with id {id} to edit");
 
-            var painting = await FindPaintingById(id);
+            var painting = await _unitOfWork.Paintings.FindByIdAsync(id);
             if (painting == null)
             {
                 return Result<PaintingDto>.Fail($"Painting with ID {id} not found.");
@@ -95,7 +92,6 @@ namespace Karpinski_XY_Server.Services
 
             var paintingDto = _mapper.Map<PaintingDto>(painting);
 
-            // Convert image paths to Base64 strings
             var imageConversionResult = await _fileService.ConvertImagePathsToBase64Async(paintingDto.PaintingImages);
             if (!imageConversionResult.Succeeded)
             {
@@ -103,224 +99,172 @@ namespace Karpinski_XY_Server.Services
             }
 
             paintingDto.PaintingImages = imageConversionResult.Value;
-
             return Result<PaintingDto>.Success(paintingDto);
         }
-        public async Task<Result<PaintingDto>> Update(PaintingDto model)
+
+        public async Task<Result<PaintingDto>> UpdateAsync(PaintingDto model)
         {
             var validationResult = _paintingValidator.Validate(model);
-
             if (!validationResult.IsValid)
             {
                 var errorMessages = validationResult.Errors.Select(e => e.ErrorMessage);
                 _logger.LogError("Validation failed for inquiry. Errors: {ValidationErrors}", string.Join(", ", errorMessages));
-                return Result<PaintingDto>.Fail(validationResult.Errors.Select(e => e.ErrorMessage));
+                return Result<PaintingDto>.Fail(errorMessages);
             }
 
             _logger.LogInformation($"Looking to update painting with id {model.Id}");
 
-            var painting = await FindPaintingById(model.Id);
+            var painting = await _unitOfWork.Paintings.FindByIdAsync(model.Id);
             if (painting == null)
             {
                 _logger.LogWarning($"Painting with ID {model.Id} not found.");
                 return Result<PaintingDto>.Fail("Painting not found.");
             }
 
-            painting.PaintingImages.ForEach(i => i.IsDeleted = true);
-            _context.UpdateRange(painting.PaintingImages);
-            painting.IsDeleted = true;
-            _context.Update(painting);
-            await _context.SaveChangesAsync();
-            await Create(model);
+            await _unitOfWork.Paintings.DeleteAsync(model.Id);
+
+            // Create a new record for the updated painting
+            await CreateAsync(model);
+
+            await _unitOfWork.CommitAsync();
 
             _cacheService.RemoveAll(new[]
             {
-            GetPaintingByIdCacheKey(model.Id),
-            AllPaintingsToSellCacheKey,
-            AvailablePaintingsCacheKey,
-            PortfolioPaintingsCacheKey,
-            PaintingsOnFocusCacheKey
-            });
+        GetPaintingByIdCacheKey(model.Id),
+        AllPaintingsToSellCacheKey,
+        AvailablePaintingsCacheKey,
+        PortfolioPaintingsCacheKey,
+        PaintingsOnFocusCacheKey
+    });
+
             return Result<PaintingDto>.Success(model);
         }
 
 
-        public async Task<Result<bool>> Delete(Guid id)
+        public async Task<Result<bool>> DeleteAsync(Guid id)
         {
-            _logger.LogInformation($"Deleting painting with {id}");
+            _logger.LogInformation($"Deleting painting with id {id}");
 
-            var painting = await FindPaintingById(id);
+            var painting = await _unitOfWork.Paintings.FindByIdAsync(id);
             if (painting == null)
             {
                 _logger.LogWarning($"Painting with ID {id} not found.");
                 return Result<bool>.Fail($"Painting with ID {id} not found.");
             }
 
-            painting.IsDeleted = true;
-            painting.PaintingImages.ForEach(image => image.IsDeleted = true);
-            _context.Update(painting);
-            await _context.SaveChangesAsync();
+            await _unitOfWork.Paintings.DeleteAsync(id);
+            await _unitOfWork.CommitAsync();
 
             _cacheService.RemoveAll(new[]
             {
-                GetPaintingByIdCacheKey(id),
-                AllPaintingsToSellCacheKey,
-                AvailablePaintingsCacheKey,
-                PortfolioPaintingsCacheKey,
-                PaintingsOnFocusCacheKey
-            });
-            _logger.LogInformation($"Deleted painting successfully");
+        GetPaintingByIdCacheKey(id),
+        AllPaintingsToSellCacheKey,
+        AvailablePaintingsCacheKey,
+        PortfolioPaintingsCacheKey,
+        PaintingsOnFocusCacheKey
+    });
+
+            _logger.LogInformation("Deleted painting successfully");
             return Result<bool>.Success(true);
         }
 
-
-        public async Task<Result<IEnumerable<PaintingDto>>> GetAllPaintingsToSell()
-        {
-            var cachedPaintings = _cacheService.Get<IEnumerable<PaintingDto>>(AllPaintingsToSellCacheKey);
-
-            if (cachedPaintings == null)
-            {
-                _logger.LogInformation("Fetching all paintings to sell from the database");
-
-                var paintings = await _context
-                    .Paintings
-                    .Include(p => p.PaintingImages.Where(i => i.IsMainImage))
-                    .Where(p => !p.IsDeleted && p.IsAvailableToSell)
-                    .ToListAsync();
-
-                paintings = FilterMainImage(paintings).ToList();
-                cachedPaintings = _mapper.Map<IEnumerable<PaintingDto>>(paintings);
-
-                // Use default cache settings
-                _cacheService.Set(AllPaintingsToSellCacheKey, cachedPaintings);
-            }
-
-            return Result<IEnumerable<PaintingDto>>.Success(cachedPaintings);
-        }
-
-
-        public async Task<Result<IEnumerable<PaintingDto>>> GetAvailablePaintings()
-        {
-            var cachedPaintings = _cacheService.Get<IEnumerable<PaintingDto>>(AvailablePaintingsCacheKey);
-
-            if (cachedPaintings == null)
-            {
-                _logger.LogInformation("Fetching available paintings from the database");
-
-                var paintings = await _context
-                    .Paintings
-                    .Include(p => p.PaintingImages.Where(i => i.IsMainImage))
-                    .Where(p => p.IsAvailableToSell && !p.IsDeleted && !p.IsOnFocus)
-                    .ToListAsync();
-
-                paintings = FilterMainImage(paintings).ToList();
-
-                cachedPaintings = _mapper.Map<IEnumerable<PaintingDto>>(paintings);
-
-                // Use default cache settings
-                _cacheService.Set(AvailablePaintingsCacheKey, cachedPaintings);
-            }
-
-            return Result<IEnumerable<PaintingDto>>.Success(cachedPaintings);
-        }
-
-
-        public async Task<Result<IEnumerable<PaintingDto>>> GetPortfolioPaintings()
-        {
-            var cachedPaintings = _cacheService.Get<IEnumerable<PaintingDto>>(PortfolioPaintingsCacheKey);
-
-            if (cachedPaintings == null)
-            {
-                _logger.LogInformation("Fetching portfolio paintings from the database");
-
-                var paintings = await _context
-                    .Paintings
-                    .Include(p => p.PaintingImages.OrderBy(i => !i.IsMainImage))
-                    .Where(p => !p.IsAvailableToSell && !p.IsDeleted)
-                    .ToListAsync();
-
-                paintings = FilterMainImage(paintings).ToList();
-
-                cachedPaintings = _mapper.Map<IEnumerable<PaintingDto>>(paintings);
-
-                // Use default cache settings
-                _cacheService.Set(PortfolioPaintingsCacheKey, cachedPaintings);
-            }
-
-            return Result<IEnumerable<PaintingDto>>.Success(cachedPaintings);
-        }
-
-
-        public async Task<Result<IEnumerable<PaintingDto>>> GetPaintingsOnFocus()
-        {
-            var cachedPaintings = _cacheService.Get<IEnumerable<PaintingDto>>(PaintingsOnFocusCacheKey);
-
-            if (cachedPaintings == null)
-            {
-                _logger.LogInformation("Fetching paintings on focus from the database");
-
-                var paintings = await _context
-                    .Paintings
-                    .Include(p => p.PaintingImages.Where(i => i.IsMainImage))
-                    .Where(p => p.IsAvailableToSell && !p.IsDeleted && p.IsOnFocus)
-                    .OrderByDescending(p => p.CreatedOn)
-                    .ToListAsync();
-
-                paintings = FilterMainImage(paintings).ToList();
-
-                cachedPaintings = _mapper.Map<IEnumerable<PaintingDto>>(paintings);
-
-                // Use default cache settings
-                _cacheService.Set(PaintingsOnFocusCacheKey, cachedPaintings);
-            }
-
-            return Result<IEnumerable<PaintingDto>>.Success(cachedPaintings);
-        }
-
-        public async Task<Result<PaintingDto>> GetPaintingById(Guid id)
+        public async Task<Result<PaintingDto>> GetPaintingByIdAsync(Guid id)
         {
             var cacheKey = GetPaintingByIdCacheKey(id);
 
+            // Attempt to retrieve from cache
             var cachedPainting = _cacheService.Get<PaintingDto>(cacheKey);
-
-            if (cachedPainting == null)
+            if (cachedPainting != null)
             {
-                _logger.LogInformation($"Fetching painting with ID {id} from the database");
-
-                var painting = await FindPaintingById(id);
-                if (painting == null)
-                {
-                    return Result<PaintingDto>.Fail($"Painting with ID {id} not found.");
-                }
-
-                cachedPainting = _mapper.Map<PaintingDto>(painting);
-
-                // Use default cache settings
-                _cacheService.Set(cacheKey, cachedPainting);
+                return Result<PaintingDto>.Success(cachedPainting);
             }
 
-            return Result<PaintingDto>.Success(cachedPainting);
+            _logger.LogInformation($"Fetching painting with ID {id} from the database");
+
+            // Fetch from repository
+            var painting = await _unitOfWork.Paintings.FindByIdAsync(id); // Using the existing repository method
+            if (painting == null)
+            {
+                return Result<PaintingDto>.Fail($"Painting with ID {id} not found.");
+            }
+
+            // Map to DTO
+            var paintingDto = _mapper.Map<PaintingDto>(painting);
+
+            // Cache the result
+            _cacheService.Set(cacheKey, paintingDto);
+
+            return Result<PaintingDto>.Success(paintingDto);
+        }
+
+
+        public async Task<Result<IEnumerable<PaintingDto>>> GetAllPaintingsToSellAsync()
+        {
+            const string cacheKey = "AllPaintingsToSell";
+            return await GetCachedPaintingsAsync(
+                cacheKey,
+                () => _unitOfWork.Paintings.GetAllToSellAsync(),
+                "Fetching all paintings to sell from the database");
+        }
+
+        public async Task<Result<IEnumerable<PaintingDto>>> GetAvailablePaintingsAsync()
+        {
+            const string cacheKey = "AvailablePaintings";
+            return await GetCachedPaintingsAsync(
+                cacheKey,
+                () => _unitOfWork.Paintings.GetAvailableAsync(),
+                "Fetching available paintings from the database");
+        }
+
+        public async Task<Result<IEnumerable<PaintingDto>>> GetPortfolioPaintingsAsync()
+        {
+            const string cacheKey = "PortfolioPaintings";
+            return await GetCachedPaintingsAsync(
+                cacheKey,
+                () => _unitOfWork.Paintings.GetPortfolioAsync(),
+                "Fetching portfolio paintings from the database");
+        }
+
+        public async Task<Result<IEnumerable<PaintingDto>>> GetPaintingsOnFocusAsync()
+        {
+            const string cacheKey = "PaintingsOnFocus";
+            return await GetCachedPaintingsAsync(
+                cacheKey,
+                () => _unitOfWork.Paintings.GetOnFocusAsync(),
+                "Fetching paintings on focus from the database");
+        }
+
+        private async Task<Result<IEnumerable<PaintingDto>>> GetCachedPaintingsAsync(
+            string cacheKey,
+            Func<Task<IEnumerable<Painting>>> fetchFromDatabase,
+            string logMessage)
+        {
+            // Attempt to retrieve from cache
+            var cachedPaintings = _cacheService.Get<IEnumerable<PaintingDto>>(cacheKey);
+
+            if (cachedPaintings != null)
+            {
+                return Result<IEnumerable<PaintingDto>>.Success(cachedPaintings);
+            }
+
+            // Fetch from database if not in cache
+            _logger.LogInformation(logMessage);
+            var paintings = await fetchFromDatabase();
+
+            // Filter main image and map to DTOs
+            var filteredPaintings = FilterMainImage(paintings);
+            var paintingDtos = _mapper.Map<IEnumerable<PaintingDto>>(filteredPaintings);
+
+            // Cache the result
+            _cacheService.Set(cacheKey, paintingDtos);
+
+            return Result<IEnumerable<PaintingDto>>.Success(paintingDtos);
         }
 
         private static string GetPaintingByIdCacheKey(Guid id)
         {
             return $"Painting_{id}";
         }
-
-        private async Task<Painting> FindPaintingById(Guid id)
-        => await _context
-            .Paintings.AsNoTracking()
-            .Include(p => p.PaintingImages
-            .Where(i => !i.IsDeleted)
-            .OrderByDescending(i => i.IsMainImage))
-            .FirstOrDefaultAsync(p => p.Id == id);
-
-        private async Task<bool> PaintingExists(string name)
-        => await _context
-            .Paintings
-            .AsNoTracking()
-            .Where(i => !i.IsDeleted)
-            .AnyAsync(i => i.Name == name);
 
         private IEnumerable<Painting> FilterMainImage(IEnumerable<Painting> paintings)
         {

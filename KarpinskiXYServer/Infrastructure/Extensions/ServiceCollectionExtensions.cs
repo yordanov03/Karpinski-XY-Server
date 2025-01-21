@@ -1,6 +1,7 @@
 ﻿using FluentValidation;
 using Karpinski_XY.Data;
 using Karpinski_XY.Models;
+using Karpinski_XY_Server.Data;
 using Karpinski_XY_Server.Data.Models.Configuration;
 using Karpinski_XY_Server.Dtos.Exhibition;
 using Karpinski_XY_Server.Dtos.Painting;
@@ -81,6 +82,14 @@ namespace Karpinski_XY.Infrastructure.Extensions
 
             services.RegisterAssemblyPublicNonGenericClasses()
                     .Where(c => c.Name.EndsWith("Service"))
+                    .AsPublicImplementedInterfaces(ServiceLifetime.Scoped);
+
+            // Register Unit of Work
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            // Register repositories dynamically
+            services.RegisterAssemblyPublicNonGenericClasses()
+                    .Where(c => c.Name.EndsWith("Repository"))
                     .AsPublicImplementedInterfaces(ServiceLifetime.Scoped);
         }
 

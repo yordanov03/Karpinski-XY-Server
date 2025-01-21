@@ -23,7 +23,7 @@ namespace Karpinski_XY_Server.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Create([FromBody] ExhibitionDto model)
         {
-            var result = await _exhibitionService.CreateExhibition(model);
+            var result = await _exhibitionService.CreateExhibitionAsync(model);
 
             if (result.Succeeded)
             {
@@ -40,7 +40,7 @@ namespace Karpinski_XY_Server.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetExhibition(Guid id)
         {
-            var result = await _exhibitionService.GetExhibitionById(id);
+            var result = await _exhibitionService.GetExhibitionByIdAsync(id);
 
             if (result.Succeeded)
             {
@@ -57,7 +57,7 @@ namespace Karpinski_XY_Server.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetExhibitionToEdit(Guid id)
         {
-            var result = await _exhibitionService.GetExhibitionToUpdate(id);
+            var result = await _exhibitionService.GetExhibitionToUpdateAsync(id);
             if (result.Succeeded)
             {
                 return Ok(result.Value);
@@ -73,7 +73,7 @@ namespace Karpinski_XY_Server.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> GetAllExhibitions()
         {
-            var result = await _exhibitionService.GetAllExhibitions();
+            var result = await _exhibitionService.GetAllExhibitionsAsync();
 
             if (result.Succeeded)
             {
@@ -91,7 +91,7 @@ namespace Karpinski_XY_Server.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Update([FromBody] ExhibitionDto model)
         {
-            var result = await _exhibitionService.UpdateExhibition(model);
+            var result = await _exhibitionService.UpdateExhibitionAsync(model);
 
             if (result.Succeeded)
             {
@@ -109,7 +109,7 @@ namespace Karpinski_XY_Server.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var result = await _exhibitionService.DeleteExhibition(id);
+            var result = await _exhibitionService.DeleteExhibitionAsync(id);
 
             if (result.Succeeded)
             {

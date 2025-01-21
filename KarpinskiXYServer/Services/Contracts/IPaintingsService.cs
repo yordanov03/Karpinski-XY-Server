@@ -5,14 +5,14 @@ namespace Karpinski_XY_Server.Services.Contracts
 {
     public interface IPaintingsService
     {
-        public Task<Result<IEnumerable<PaintingDto>>> GetAllPaintingsToSell();
-        public Task<Result<IEnumerable<PaintingDto>>> GetAvailablePaintings();
-        public Task<Result<IEnumerable<PaintingDto>>> GetPaintingsOnFocus();
-        public Task<Result<IEnumerable<PaintingDto>>> GetPortfolioPaintings();
-        public Task<Result<PaintingDto>> GetPaintingById(Guid id);
-        public Task<Result<PaintingDto>> GetPaintingToEdit(Guid id);
-        public Task<Result<Guid>> Create(PaintingDto model);
-        public Task<Result<PaintingDto>> Update(PaintingDto model);
-        public Task<Result<bool>> Delete(Guid id);
+        public Task<Result<Guid>> CreateAsync(PaintingDto model);
+        public Task<Result<PaintingDto>> GetPaintingToEditAsync(Guid id);
+        public Task<Result<PaintingDto>> UpdateAsync(PaintingDto model);
+        public Task<Result<bool>> DeleteAsync(Guid id);
+        public Task<Result<PaintingDto>> GetPaintingByIdAsync(Guid id);
+        public Task<Result<IEnumerable<PaintingDto>>> GetAllPaintingsToSellAsync();
+        public Task<Result<IEnumerable<PaintingDto>>> GetAvailablePaintingsAsync();
+        public Task<Result<IEnumerable<PaintingDto>>> GetPaintingsOnFocusAsync();
+        public Task<Result<IEnumerable<PaintingDto>>> GetPortfolioPaintingsAsync();
     }
 }
