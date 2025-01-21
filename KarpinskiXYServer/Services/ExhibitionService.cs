@@ -75,6 +75,41 @@ namespace Karpinski_XY_Server.Services
             return Result<Guid>.Success(model.Id);
         }
 
+        public async Task<Result<ExhibitionDto>> UpdateExhibition(ExhibitionDto model)
+        {
+            var validationResult = _exhibitionValidator.Validate(model);
+
+            if (!validationResult.IsValid)
+            {
+                var errorMessages = validationResult.Errors.Select(e => e.ErrorMessage);
+                _logger.LogError("Validation failed for exhibition update. Errors: {ValidationErrors}", string.Join(", ", errorMessages));
+                return Result<ExhibitionDto>.Fail(validationResult.Errors.Select(e => e.ErrorMessage));
+            }
+
+            _logger.LogInformation($"Updating exhibition with id {model.Id}");
+
+            var exhibition = await FindExhibitionById(model.Id);
+            if (exhibition == null)
+            {
+                _logger.LogWarning($"Exhibition with ID {model.Id} not found.");
+                return Result<ExhibitionDto>.Fail("Exhibition not found.");
+            }
+
+            exhibition.ExhibitionImages.ForEach(i => i.IsDeleted = true);
+            _context.UpdateRange(exhibition.ExhibitionImages);
+            exhibition.IsDeleted = true;
+            _context.Update(exhibition);
+            await _context.SaveChangesAsync();
+
+            await CreateExhibition(model);
+
+            _cacheService.Remove(GetExhibitionByIdCacheKey(model.Id));
+            _cacheService.Remove(AllExhibitionsCacheKey);
+
+            _logger.LogInformation("Exhibition updated successfully");
+            return Result<ExhibitionDto>.Success(model);
+        }
+
         public async Task<Result<bool>> DeleteExhibition(Guid id)
         {
             _logger.LogInformation($"Deleting exhibition with ID {id}");
@@ -111,6 +146,8 @@ namespace Karpinski_XY_Server.Services
                         .Where(e => e.IsMainImage))
                         .Where(e => !e.IsDeleted)
                     .ToListAsync();
+
+                exhibitions = FilterMainImageForExhibitions(exhibitions).ToList();
 
                 cachedExhibitions = _mapper.Map<IEnumerable<ExhibitionDto>>(exhibitions);
 
@@ -164,40 +201,6 @@ namespace Karpinski_XY_Server.Services
             return Result<ExhibitionDto>.Success(exhibitionDto);
         }
 
-        public async Task<Result<ExhibitionDto>> UpdateExhibition(ExhibitionDto model)
-        {
-            var validationResult = _exhibitionValidator.Validate(model);
-
-            if (!validationResult.IsValid)
-            {
-                var errorMessages = validationResult.Errors.Select(e => e.ErrorMessage);
-                _logger.LogError("Validation failed for exhibition update. Errors: {ValidationErrors}", string.Join(", ", errorMessages));
-                return Result<ExhibitionDto>.Fail(validationResult.Errors.Select(e => e.ErrorMessage));
-            }
-
-            _logger.LogInformation($"Updating exhibition with id {model.Id}");
-
-            var exhibition = await FindExhibitionById(model.Id);
-            if (exhibition == null)
-            {
-                _logger.LogWarning($"Exhibition with ID {model.Id} not found.");
-                return Result<ExhibitionDto>.Fail("Exhibition not found.");
-            }
-
-            exhibition.ExhibitionImages.ForEach(i => i.IsDeleted = true);
-            _context.UpdateRange(exhibition.ExhibitionImages);
-            exhibition.IsDeleted = true;
-            _context.Update(exhibition);
-            await _context.SaveChangesAsync();
-
-            await CreateExhibition(model);
-
-            _cacheService.Remove(GetExhibitionByIdCacheKey(model.Id));
-            _cacheService.Remove(AllExhibitionsCacheKey);
-
-            _logger.LogInformation("Exhibition updated successfully");
-            return Result<ExhibitionDto>.Success(model);
-        }
 
         private async Task <Exhibition> FindExhibitionById(Guid id)
         => await _context
@@ -213,5 +216,18 @@ namespace Karpinski_XY_Server.Services
             .Exhibitions
             .Where(i => !i.IsDeleted)
             .AnyAsync(i => i.Title == title);
+
+        private IEnumerable<Exhibition> FilterMainImageForExhibitions(IEnumerable<Exhibition> exhibitions)
+        {
+            foreach (var exhibition in exhibitions)
+            {
+                exhibition.ExhibitionImages = exhibition.ExhibitionImages
+                    .Where(i => i.IsMainImage)
+                    .ToList();
+            }
+
+            return exhibitions;
+        }
+
     }
 }

@@ -188,6 +188,7 @@ namespace Karpinski_XY_Server.Services
                     .Where(p => !p.IsDeleted && p.IsAvailableToSell)
                     .ToListAsync();
 
+                paintings = FilterMainImage(paintings).ToList();
                 cachedPaintings = _mapper.Map<IEnumerable<PaintingDto>>(paintings);
 
                 // Use default cache settings
@@ -212,6 +213,8 @@ namespace Karpinski_XY_Server.Services
                     .Where(p => p.IsAvailableToSell && !p.IsDeleted && !p.IsOnFocus)
                     .ToListAsync();
 
+                paintings = FilterMainImage(paintings).ToList();
+
                 cachedPaintings = _mapper.Map<IEnumerable<PaintingDto>>(paintings);
 
                 // Use default cache settings
@@ -219,32 +222,6 @@ namespace Karpinski_XY_Server.Services
             }
 
             return Result<IEnumerable<PaintingDto>>.Success(cachedPaintings);
-        }
-
-
-        public async Task<Result<PaintingDto>> GetPaintingById(Guid id)
-        {
-            var cacheKey = GetPaintingByIdCacheKey(id);
-
-            var cachedPainting = _cacheService.Get<PaintingDto>(cacheKey);
-
-            if (cachedPainting == null)
-            {
-                _logger.LogInformation($"Fetching painting with ID {id} from the database");
-
-                var painting = await FindPaintingById(id);
-                if (painting == null)
-                {
-                    return Result<PaintingDto>.Fail($"Painting with ID {id} not found.");
-                }
-
-                cachedPainting = _mapper.Map<PaintingDto>(painting);
-
-                // Use default cache settings
-                _cacheService.Set(cacheKey, cachedPainting);
-            }
-
-            return Result<PaintingDto>.Success(cachedPainting);
         }
 
 
@@ -261,6 +238,8 @@ namespace Karpinski_XY_Server.Services
                     .Include(p => p.PaintingImages.OrderBy(i => !i.IsMainImage))
                     .Where(p => !p.IsAvailableToSell && !p.IsDeleted)
                     .ToListAsync();
+
+                paintings = FilterMainImage(paintings).ToList();
 
                 cachedPaintings = _mapper.Map<IEnumerable<PaintingDto>>(paintings);
 
@@ -287,6 +266,8 @@ namespace Karpinski_XY_Server.Services
                     .OrderByDescending(p => p.CreatedOn)
                     .ToListAsync();
 
+                paintings = FilterMainImage(paintings).ToList();
+
                 cachedPaintings = _mapper.Map<IEnumerable<PaintingDto>>(paintings);
 
                 // Use default cache settings
@@ -294,6 +275,31 @@ namespace Karpinski_XY_Server.Services
             }
 
             return Result<IEnumerable<PaintingDto>>.Success(cachedPaintings);
+        }
+
+        public async Task<Result<PaintingDto>> GetPaintingById(Guid id)
+        {
+            var cacheKey = GetPaintingByIdCacheKey(id);
+
+            var cachedPainting = _cacheService.Get<PaintingDto>(cacheKey);
+
+            if (cachedPainting == null)
+            {
+                _logger.LogInformation($"Fetching painting with ID {id} from the database");
+
+                var painting = await FindPaintingById(id);
+                if (painting == null)
+                {
+                    return Result<PaintingDto>.Fail($"Painting with ID {id} not found.");
+                }
+
+                cachedPainting = _mapper.Map<PaintingDto>(painting);
+
+                // Use default cache settings
+                _cacheService.Set(cacheKey, cachedPainting);
+            }
+
+            return Result<PaintingDto>.Success(cachedPainting);
         }
 
         private static string GetPaintingByIdCacheKey(Guid id)
@@ -316,5 +322,16 @@ namespace Karpinski_XY_Server.Services
             .Where(i => !i.IsDeleted)
             .AnyAsync(i => i.Name == name);
 
+        private IEnumerable<Painting> FilterMainImage(IEnumerable<Painting> paintings)
+        {
+            foreach (var painting in paintings)
+            {
+                painting.PaintingImages = painting.PaintingImages
+                    .Where(i => i.IsMainImage)
+                    .ToList();
+            }
+
+            return paintings;
+        }
     }
 }
