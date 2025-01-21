@@ -7,6 +7,5 @@ namespace Karpinski_XY_Server.Services.Contracts
     {
         Task<Result<List<T>>> UpdateImagePathsAsync(List<T> images);
         Task<Result<List<T>>> ConvertImagePathsToBase64Async(List<T> imageDtos);
-        void MarkDeletedImagesAsDeleted(List<T> imageDtos, List<ImageBase> images);
     }
 }

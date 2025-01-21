@@ -121,20 +121,5 @@ namespace Karpinski_XY_Server.Services.FileServices
                 return errorMessage;
             }
         }
-
-        //Other
-
-        public void MarkDeletedImagesAsDeleted(List<T> imageDtos, List<ImageBase> images)
-        {
-            var imageDtoIds = new HashSet<Guid>(imageDtos.Select(dto => dto.Id));
-
-            images.ForEach(image =>
-            {
-                if (!imageDtoIds.Contains(image.Id))
-                {
-                    image.IsDeleted = true;
-                }
-            });
-        }
     }
 }

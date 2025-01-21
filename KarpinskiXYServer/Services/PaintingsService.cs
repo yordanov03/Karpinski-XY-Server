@@ -122,20 +122,20 @@ namespace Karpinski_XY_Server.Services
             }
 
             await _unitOfWork.Paintings.DeleteAsync(model.Id);
+            await _unitOfWork.CommitAsync();
 
             // Create a new record for the updated painting
             await CreateAsync(model);
-
             await _unitOfWork.CommitAsync();
 
             _cacheService.RemoveAll(new[]
             {
-        GetPaintingByIdCacheKey(model.Id),
-        AllPaintingsToSellCacheKey,
-        AvailablePaintingsCacheKey,
-        PortfolioPaintingsCacheKey,
-        PaintingsOnFocusCacheKey
-    });
+                GetPaintingByIdCacheKey(model.Id),
+                AllPaintingsToSellCacheKey,
+                AvailablePaintingsCacheKey,
+                PortfolioPaintingsCacheKey,
+                PaintingsOnFocusCacheKey
+            });
 
             return Result<PaintingDto>.Success(model);
         }
@@ -157,12 +157,12 @@ namespace Karpinski_XY_Server.Services
 
             _cacheService.RemoveAll(new[]
             {
-        GetPaintingByIdCacheKey(id),
-        AllPaintingsToSellCacheKey,
-        AvailablePaintingsCacheKey,
-        PortfolioPaintingsCacheKey,
-        PaintingsOnFocusCacheKey
-    });
+                GetPaintingByIdCacheKey(id),
+                AllPaintingsToSellCacheKey,
+                AvailablePaintingsCacheKey,
+                PortfolioPaintingsCacheKey,
+                PaintingsOnFocusCacheKey
+            });
 
             _logger.LogInformation("Deleted painting successfully");
             return Result<bool>.Success(true);

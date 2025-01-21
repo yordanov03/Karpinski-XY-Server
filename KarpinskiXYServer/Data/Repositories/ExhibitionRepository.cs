@@ -44,7 +44,6 @@ namespace Karpinski_XY_Server.Data.Repositories
                 exhibition.ExhibitionImages.ForEach(image => image.ModifiedOn = DateTime.Now);
                 _context.Exhibitions.Update(exhibition);
                 _context.ExhibitionImages.UpdateRange(exhibition.ExhibitionImages);
-                _context.SaveChanges();
             }
         }
 

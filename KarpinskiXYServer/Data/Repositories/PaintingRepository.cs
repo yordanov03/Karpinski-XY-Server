@@ -29,7 +29,6 @@ namespace Karpinski_XY_Server.Data.Repositories
                 painting.PaintingImages.ForEach(image => image.ModifiedOn = DateTime.Now);
                 _context.Paintings.Update(painting);
                 _context.PaintingImages.UpdateRange(painting.PaintingImages);
-                _context.SaveChanges();
             }
         }
 
