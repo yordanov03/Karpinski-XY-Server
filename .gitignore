@@ -362,3 +362,5 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /Karpinski XY Server/Resources/Images
+/KarpinskiXYServer/Resources/Images/Paintings
+/KarpinskiXYServer/Resources/Images/Exhibitions
