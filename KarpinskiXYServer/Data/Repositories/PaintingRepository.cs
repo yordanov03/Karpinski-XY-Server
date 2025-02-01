@@ -38,6 +38,7 @@ namespace Karpinski_XY_Server.Data.Repositories
                 .Include(p => p.PaintingImages)
                 .Where(p => !p.IsDeleted && p.IsAvailableToSell)
                 .OrderBy(_ => Guid.NewGuid())
+                .Distinct()
                 .ToListAsync();
         }
 
@@ -47,6 +48,7 @@ namespace Karpinski_XY_Server.Data.Repositories
                 .Include(p => p.PaintingImages)
                 .Where(p => p.IsAvailableToSell && !p.IsDeleted && !p.IsOnFocus)
                 .OrderBy(_ => Guid.NewGuid())
+                .Distinct()
                 .ToListAsync();
         }
 
@@ -56,6 +58,7 @@ namespace Karpinski_XY_Server.Data.Repositories
                 .Include(p => p.PaintingImages.OrderBy(i => !i.IsMainImage))
                 .Where(p => !p.IsAvailableToSell && !p.IsDeleted)
                 .OrderBy(_ => Guid.NewGuid())
+                .Distinct()
                 .ToListAsync();
         }
 
@@ -65,6 +68,7 @@ namespace Karpinski_XY_Server.Data.Repositories
                 .Include(p => p.PaintingImages.Where(i => i.IsMainImage))
                 .Where(p => p.IsAvailableToSell && !p.IsDeleted && p.IsOnFocus)
                 .OrderBy(_ => Guid.NewGuid())
+                .Distinct()
                 .ToListAsync();
         }
 
