@@ -42,7 +42,7 @@ namespace Karpinski_XY_Server.Services
             var messageToRequestor = new MimeMessage();
             messageToRequestor.From.Add(MailboxAddress.Parse(_smtpSettings.SenderEmail));
             messageToRequestor.To.Add(MailboxAddress.Parse(inquiry.Email));
-            messageToRequestor.Cc.Add(MailboxAddress.Parse(_smtpSettings.CCEmail));
+            messageToRequestor.Bcc.Add(MailboxAddress.Parse(_smtpSettings.CCEmail));
             messageToRequestor.Subject = $"Inquiry: {caseNumber} " + inquiry.Subject;
             messageToRequestor.Body = new TextPart("html") { Text = EmailTemplates.RequestorConfirmationTemplate(inquiry) };
 
