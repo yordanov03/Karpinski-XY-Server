@@ -28,6 +28,12 @@ namespace Karpinski_XY_Server.Services
 
         public async Task<Result<string>> SendEmailAsync(ContactDto inquiry)
         {
+            if (IsBlacklisted(inquiry.Email))
+            {
+                _logger.LogWarning("Email suppressed because it is blacklisted: {Email}", inquiry.Email);
+                return Result<string>.Success("Email suppressed (blacklisted)");
+            }
+
             var validationResult = _inquiryValidator.Validate(inquiry);
             if (!validationResult.IsValid)
             {
@@ -74,6 +80,10 @@ namespace Karpinski_XY_Server.Services
 
             return emailResult;
         }
-
+        private bool IsBlacklisted(string email)
+        {
+            return _smtpSettings.BlacklistedEmails
+                .Any(b => string.Equals(b, email, StringComparison.OrdinalIgnoreCase));
+        }
     }
 }
