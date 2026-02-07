@@ -80,10 +80,41 @@ namespace Karpinski_XY_Server.Services
 
             return emailResult;
         }
+        private static string GetDomain(string email)
+        {
+            var atIndex = email.LastIndexOf('@');
+            return atIndex >= 0
+                ? email[(atIndex + 1)..]
+                : string.Empty;
+        }
+        private static string Normalize(string value)
+    => value.Trim().ToLowerInvariant();
+
+
         private bool IsBlacklisted(string email)
         {
-            return _smtpSettings.BlacklistedEmails
-                .Any(b => string.Equals(b, email, StringComparison.OrdinalIgnoreCase));
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return false;
+            }
+
+            var normalizedEmail = Normalize(email);
+            var domain = GetDomain(normalizedEmail);
+
+            return _smtpSettings.BlacklistedEmails.Any(entry =>
+            {
+                var normalizedEntry = Normalize(entry);
+
+                // Exact email match
+                if (normalizedEntry.Contains('@'))
+                {
+                    return normalizedEntry == normalizedEmail;
+                }
+
+                // Domain match (evil.com or @evil.com)
+                return domain == normalizedEntry.TrimStart('@');
+            });
         }
+
     }
 }
