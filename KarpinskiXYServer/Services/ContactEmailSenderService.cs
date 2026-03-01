@@ -80,41 +80,89 @@ namespace Karpinski_XY_Server.Services
 
             return emailResult;
         }
-        private static string GetDomain(string email)
-        {
-            var atIndex = email.LastIndexOf('@');
-            return atIndex >= 0
-                ? email[(atIndex + 1)..]
-                : string.Empty;
-        }
         private static string Normalize(string value)
-    => value.Trim().ToLowerInvariant();
+  => value?.Trim().ToLowerInvariant() ?? string.Empty;
 
+        private static string ExtractEmailAddress(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input)) return string.Empty;
+
+            // handles: "Name <user@evil.com>"
+            var trimmed = input.Trim();
+            var lt = trimmed.LastIndexOf('<');
+            var gt = trimmed.LastIndexOf('>');
+
+            if (lt >= 0 && gt > lt)
+            {
+                trimmed = trimmed.Substring(lt + 1, gt - lt - 1).Trim();
+            }
+
+            return trimmed;
+        }
+
+        private static string GetDomainSafe(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email)) return string.Empty;
+
+            var at = email.LastIndexOf('@');
+            if (at < 0 || at == email.Length - 1) return string.Empty;
+
+            var domain = email.Substring(at + 1).Trim();
+
+            // strip port if present: "evil.com:123"
+            var colon = domain.IndexOf(':');
+            if (colon > 0) domain = domain.Substring(0, colon);
+
+            // strip trailing punctuation
+            domain = domain.Trim().TrimEnd('.', ',', ';');
+
+            return domain;
+        }
+
+        private static string NormalizeBlacklistEntry(string entry)
+        {
+            var normalized = Normalize(entry);
+
+            // strip inline comments: "@evil.com # old"
+            var hash = normalized.IndexOf('#');
+            if (hash >= 0) normalized = normalized.Substring(0, hash).Trim();
+
+            // remove trailing separators
+            normalized = normalized.TrimEnd(',', ';');
+
+            return normalized;
+        }
+
+        private static bool IsEmailEntry(string entry)
+        {
+            var at = entry.IndexOf('@');
+            return at > 0 && at == entry.LastIndexOf('@'); // basic sanity
+        }
 
         private bool IsBlacklisted(string email)
         {
-            if (string.IsNullOrWhiteSpace(email))
+            if (string.IsNullOrWhiteSpace(email)) return false;
+
+            var extractedEmail = Normalize(ExtractEmailAddress(email));
+            var domain = GetDomainSafe(extractedEmail);
+            if (string.IsNullOrWhiteSpace(domain)) return false;
+
+            return _smtpSettings.BlacklistedEmails.Any(rawEntry =>
             {
-                return false;
-            }
+                var entry = NormalizeBlacklistEntry(rawEntry);
+                if (string.IsNullOrWhiteSpace(entry)) return false;
 
-            var normalizedEmail = Normalize(email);
-            var domain = GetDomain(normalizedEmail);
-
-            return _smtpSettings.BlacklistedEmails.Any(entry =>
-            {
-                var normalizedEntry = Normalize(entry);
-
-                // Exact email match
-                if (normalizedEntry.Contains('@'))
+                // exact email match
+                if (IsEmailEntry(entry))
                 {
-                    return normalizedEntry == normalizedEmail;
+                    return entry == extractedEmail;
                 }
 
-                // Domain match (evil.com or @evil.com)
-                return domain == normalizedEntry.TrimStart('@');
+                // domain match: supports "evil.com" or "@evil.com"
+                var blockedDomain = entry.TrimStart('@');
+
+                return domain == blockedDomain || domain.EndsWith("." + blockedDomain);
             });
         }
-
     }
 }
